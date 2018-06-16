@@ -1,0 +1,25 @@
+Category
+  - UUID
+  - name
+  - description (multi-lang)
+  - Product (multi)
+
+
+Product
+  - UUID
+  - name
+  - description (multi-lang)
+  - Photo (multi)
+
+Photo
+  - UUID
+  - photo_object (URL / local)
+  - description (multi-lang)
+
+
+
+
+functions:
+  - browse categories and products
+  - Search by QRCode
+  - Search by iBeacon
