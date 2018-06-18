@@ -1,46 +1,38 @@
-# database
 from mongoengine import *
-import datetime
+import datetime, json
 
 connect('museumdbase', host='localhost', port=7779)
 
 class Content(EmbeddedDocument):
-    lang        = StringField(max_length=16, required=True)
+    lang        = StringField(max_length=2, required=True)
     content     = StringField()
-
     meta        = {'indexes': [{'fields': ['$content']}]}
 
-class Photo(EmbeddedDocument):
+class Media(Document):
+    lang        = StringField(max_length=2, required=True)
     source      = FileField()
-    thumbnail   = StringField(max_length=512)
-    description = ListField(EmbeddedDocumentField(Content))
-
-class Voice(EmbeddedDocument):
-    source      = FileField()
-    description = ListField(EmbeddedDocumentField(Content))
-
-class Video(EmbeddedDocument):
-    source      = FileField()
-    description = ListField(EmbeddedDocumentField(Content))
+    thumbnail   = FileField()
+    mediatype   = StringField(max_length=8)
+    description = StringField()
 
 class Category(Document):
-    name        = StringField(max_length=128, required=True)
+    title       = ListField(EmbeddedDocumentField(Content))
     description = ListField(EmbeddedDocumentField(Content))
 
 class Artifact(Document):
     title       = ListField(EmbeddedDocumentField(Content))
     qr_id       = StringField(max_length=32)
     ibeacon_id  = StringField(max_length=32)
-
-    photos      = ListField(EmbeddedDocumentField(Photo))
-    videos      = ListField(EmbeddedDocumentField(Video))
-    voices      = ListField(EmbeddedDocumentField(Voice))
-
+    media       = ListField(ReferenceField(Media))
     category    = ReferenceField(Category, reverse_delete_rule=CASCADE)
     description = ListField(EmbeddedDocumentField(Content))
     tags        = ListField(StringField(max_length=32))
     extra       = ListField(EmbeddedDocumentField(Content))
-
     created_at  = DateTimeField(default=datetime.datetime.utcnow)
+    faved       = ListField(StringField(max_length=32)) # device_ids of users
 
     meta        = {'allow_inheritance': True, 'ordering': ['-created_at']}
+
+
+
+#EOF
