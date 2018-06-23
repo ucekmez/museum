@@ -37,6 +37,8 @@ COPY ./API.py API.py
 COPY ./db.py db.py
 COPY ./mongoengine_goodjson mongoengine_goodjson
 
+EXPOSE 8000
+
 ENTRYPOINT ["gunicorn", "--reload API"]
 
 
