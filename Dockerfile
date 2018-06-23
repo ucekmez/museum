@@ -36,7 +36,7 @@ COPY ./__init__.py __init__.py
 COPY ./API.py API.py
 COPY ./db.py db.py
 
-ENTRYPOINT ["gunicorn", "--reload API"] 
+ENTRYPOINT ["gunicorn", "--reload API"]
 
 
 
