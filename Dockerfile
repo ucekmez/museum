@@ -37,7 +37,7 @@ COPY ./API.py API.py
 COPY ./db.py db.py
 COPY ./mongoengine_goodjson mongoengine_goodjson
 
-#ENTRYPOINT ["gunicorn", "--reload API"]
+ENTRYPOINT ["gunicorn", "--reload API"]
 
 
 
