@@ -1,5 +1,5 @@
 import falcon
-from database.db import *
+from db import *
 from falcon_multipart.middleware import MultipartMiddleware
 from falcon_cors import CORS
 
