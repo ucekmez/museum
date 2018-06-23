@@ -3,3 +3,4 @@ gunicorn
 mongoengine
 falcon-multipart
 falcon-cors
+requests

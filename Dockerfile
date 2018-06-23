@@ -35,6 +35,7 @@ COPY ./test-admin test-admin
 COPY ./__init__.py __init__.py
 COPY ./API.py API.py
 COPY ./db.py db.py
+COPY ./mongoengine_goodjson mongoengine_goodjson
 
 #ENTRYPOINT ["gunicorn", "--reload API"]
 
