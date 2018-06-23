@@ -39,7 +39,7 @@ COPY ./mongoengine_goodjson mongoengine_goodjson
 
 EXPOSE 8000
 
-ENTRYPOINT ["gunicorn", "--reload API"]
+ENTRYPOINT gunicorn --reload API
 
 
 
