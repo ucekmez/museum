@@ -73,7 +73,7 @@ api.add_route('/media', allmedia)
 
 class CreateCategory(object):
     def on_post(self, req, resp):
-        data        = json.loads(req.stream.read())
+        data        = json.loads(req.stream.read().decode("utf-8"))
         title       = data['title']
         description = data['description']
         cat         = Category(title=title, description=description)
@@ -100,7 +100,7 @@ class CreateMedia(object):
 
 class CreateArtifact(object):
     def on_post(self, req, resp):
-        data        = json.loads(req.stream.read())
+        data        = json.loads(req.stream.read().decode("utf-8"))
         qr_id       = data['qr_id']
         ibeacon_id  = data['ibeacon_id']
         category    = data['category'] # references to category
@@ -127,7 +127,7 @@ class CreateArtifact(object):
 
 class CreateCategoryTranslation(object):
     def on_post(self, req, resp):
-        data        = json.loads(req.stream.read())
+        data        = json.loads(req.stream.read().decode("utf-8"))
         language    = data['language']
         title       = data['title']
         description = data['description']
@@ -141,7 +141,7 @@ class CreateCategoryTranslation(object):
 
 class CreateArtifactTranslation(object):
     def on_post(self, req, resp):
-        data        = json.loads(req.stream.read())
+        data        = json.loads(req.stream.read().decode("utf-8"))
         language    = data['language']
         title       = data['title']
         description = data['description']
