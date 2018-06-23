@@ -28,15 +28,6 @@ class FetchAllCategories(object):
         resp.set_header('X-Total-Count', count)
         resp.body = doc
 
-    def on_post(self, req, resp):
-        data        = json.loads(req.stream.read())
-        title       = data['title']
-        description = data['description']
-        cat         = Category(title=title, description=description)
-        cat.save()
-
-        resp.body = "OK"
-
 class FetchArtifact(object):
     def on_get(self, req, resp, id):
         doc = Artifact.objects(id=id).to_json(indent=2)
@@ -170,11 +161,11 @@ createcategorytranslation = CreateCategoryTranslation()
 createartifacttranslation = CreateArtifactTranslation()
 
 
-#api.add_route('/categories', createcategory)
-api.add_route('/categories/translation', createcategorytranslation)
-api.add_route('/media', createmedia)
-api.add_route('/artifacts', createartifact)
-api.add_route('/artifacts/translation', createartifacttranslation)
+api.add_route('/categories/create', createcategory)
+api.add_route('/categories/translation/create', createcategorytranslation)
+api.add_route('/media/create', createmedia)
+api.add_route('/artifacts/create', createartifact)
+api.add_route('/artifacts/translation/create', createartifacttranslation)
 
 
 
