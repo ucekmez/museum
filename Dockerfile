@@ -32,7 +32,7 @@ RUN pip install --no-cache -r requirements.txt --upgrade # python3
 WORKDIR /app
 
 COPY ./test-admin test-admin
-COPY .__init__.py __init__.py
+COPY ./__init__.py __init__.py
 COPY ./API.py API.py
 COPY ./db.py db.py
 
