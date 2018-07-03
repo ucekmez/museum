@@ -2,7 +2,7 @@ from mongoengine import *
 import datetime, json, requests, random, string
 import mongoengine_goodjson as gj
 
-connect('museumdbase', host='localhost', port=7779)
+connect('museumdbase', host='51.15.130.186', port=7779)
 
 def generateID():
     return ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])
@@ -10,6 +10,9 @@ def generateID():
 class Category(gj.Document):
     title       = StringField(max_length=64)
     description = StringField()
+    created_at  = DateTimeField(default=datetime.datetime.utcnow)
+
+    meta        = {'ordering': ['-created_at']}
 
 class CategoryTranslation(gj.Document):
     language    = StringField(max_length=8, required=True)
@@ -45,6 +48,7 @@ class Media(gj.Document):
     source      = FileField()
     thumbnail   = FileField()
     mediatype   = StringField(max_length=8)
+    header      = StringField(max_length=32)
     artifact    = ReferenceField(Artifact, reverse_delete_rule=CASCADE) # keeps artifact id
     description = StringField()
 

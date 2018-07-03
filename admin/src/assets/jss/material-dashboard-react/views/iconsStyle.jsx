@@ -36,7 +36,7 @@ const iconsStyle = {
       fontWeight: "400",
       lineHeight: "1"
     }
-  }
+  },
 };
 
 export default iconsStyle;

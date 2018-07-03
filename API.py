@@ -2,6 +2,7 @@ import falcon
 from db import *
 from falcon_multipart.middleware import MultipartMiddleware
 from falcon_cors import CORS
+import base64
 
 cors = CORS(allow_all_origins=True,
             allow_all_headers=True,
@@ -46,6 +47,12 @@ class FetchMedia(object):
         doc = Media.objects(id=id).to_json(indent=2)
         resp.body = doc
 
+class ShowMedia(object):
+    def on_get(self, req, resp, id):
+        doc = Media.objects(id=id)[0]
+        #resp.body = doc.header+doc.source.read().decode()
+        resp.body = base64.decodestring(doc.source.read())
+
 class FetchAllMedia(object):
     def on_get(self, req, resp):
         result = Media.objects()
@@ -60,6 +67,7 @@ allcategories  = FetchAllCategories()
 singleartifact = FetchArtifact()
 allartifacts   = FetchAllArtifact()
 singlemedia    = FetchMedia()
+showmedia      = ShowMedia()
 allmedia       = FetchAllMedia()
 
 api.add_route('/categories/{id}', singlecategory)
@@ -67,6 +75,7 @@ api.add_route('/categories', allcategories)
 api.add_route('/artifacts/{id}', singleartifact)
 api.add_route('/artifacts', allartifacts)
 api.add_route('/media/{id}', singlemedia)
+api.add_route('/mediashow/{id}', showmedia)
 api.add_route('/media', allmedia)
 
 ################## CREATE
@@ -74,8 +83,8 @@ api.add_route('/media', allmedia)
 class CreateCategory(object):
     def on_post(self, req, resp):
         data        = json.loads(req.stream.read().decode("utf-8"))
-        title       = data['title']
-        description = data['description']
+        title       = data['title']       if 'title' in data and data['title'] != "" else "Başlık yok!"
+        description = data['description'] if 'description' in data else ""
         cat         = Category(title=title, description=description)
         cat.save()
 
@@ -83,33 +92,34 @@ class CreateCategory(object):
 
 class CreateMedia(object):
     def on_post(self, req, resp):
-        media       = req.get_param('media')
-        media_raw   = media.file.read()
-        media_name  = media.filename
+        data        = json.loads(req.stream.read().decode("utf-8"))['data']
 
-        language    = str(req.get_param('language').value.decode('utf-8'))
-        mediatype   = str(req.get_param('mediatype').value.decode('utf-8'))
-        description = str(req.get_param('description').value.decode('utf-8'))
-        artifact    = str(req.get_param('artifact').value.decode('utf-8'))
+        mediatype   = data['mediatype'] or "image"
+        language    = data['language'] or "tr"
+        artifact    = data['artifact']
+        description = data['description']
+        media       = data['media'].split(",")[1] if data['media'] else ""
+        header      = data['media'].split(",")[0] + "," if data['media'] else ""
 
-        med = Media(language=language, mediatype=mediatype, description=description, artifact=artifact)
-        med.source.put(media_raw)
+        med = Media(language=language, mediatype=mediatype, description=description, artifact=artifact, header=header)
+        #rawdata     = base64.decodestring(media.encode())
+        med.source.put(media.encode())
         med.save()
 
-        resp.body = "OK"
+        resp.body = header+med.source.read().decode()
 
 class CreateArtifact(object):
     def on_post(self, req, resp):
         data        = json.loads(req.stream.read().decode("utf-8"))
-        qr_id       = data['qr_id']
-        ibeacon_id  = data['ibeacon_id']
+        qr_id       = data['qr_id']       if 'qr_id' in data else ""
+        ibeacon_id  = data['ibeacon_id']  if 'ibeacon_id' in data else ""
         category    = data['category'] # references to category
-        tags        = data['tags']
-        faved       = data['faved']
+        tags        = data['tags']        if 'tags' in data else ""
+        faved       = data['faved']       if 'faved' in data else ""
 
-        title       = data['title']
-        description = data['description']
-        extra       = data['extra']
+        title       = data['title']       if 'title' in data and data['title'] != "" else "Başlık yok!"
+        description = data['description'] if 'description' in data else ""
+        extra       = data['extra']       if 'extra' in data else ""
 
 #       list(map(lambda x: Content(language=x['language'], content=x['content']), data['extra']))
 
@@ -134,7 +144,10 @@ class CreateCategoryTranslation(object):
         category    = data['category']
 
 
-        cattrans    = CategoryTranslation(language=language, title=title, description=description, category=category)
+        cattrans    = CategoryTranslation(language=language,
+                                          title=title,
+                                          description=description,
+                                          category=category)
         cattrans.save()
 
         resp.body = "OK"
@@ -145,11 +158,15 @@ class CreateArtifactTranslation(object):
         language    = data['language']
         title       = data['title']
         description = data['description']
-        category    = data['category']
+        extra       = data['extra']
+        artifact    = data['artifact']
 
-
-        cattrans    = CategoryTranslation(language=language, title=title, description=description, category=category)
-        cattrans.save()
+        arttrans    = ArtifactTranslation(language=language,
+                                          title=title,
+                                          description=description,
+                                          extra=extra,
+                                          artifact=artifact)
+        arttrans.save()
 
         resp.body = "OK"
 
@@ -170,7 +187,115 @@ api.add_route('/artifacts/translation/create', createartifacttranslation)
 
 
 
+################
 
 
+class EditCategory(object):
+    def on_post(self, req, resp):
+        data        = json.loads(req.stream.read().decode("utf-8"))
+        id          = data['id']
+        title       = data['title'] if data['title'] != "" else "Başlık yok!"
+        description = data['description']
+
+        try:
+            found             = Category.objects(id=id)
+            found.update(set__title=title)
+            found.update(set__description=description)
+
+
+            resp.body = "OK"
+        except:
+            resp.body = "ERROR"
+
+class EditArtifact(object):
+    def on_post(self, req, resp):
+        data        = json.loads(req.stream.read().decode("utf-8"))
+        id          = data['id']
+        title       = data['title'] if data['title'] != "" else "Başlık yok!"
+        qr_id       = data['qr_id']
+        ibeacon_id  = data['ibeacon_id']
+        category    = data['category']
+        tags        = data['tags']
+        description = data['description']
+
+        tags        = list(filter(lambda t: len(t)> 0, tags))
+        try:
+            found = Artifact.objects(id=id)
+            found.update(set__title=title)
+            found.update(set__qr_id=qr_id)
+            found.update(set__ibeacon_id=ibeacon_id)
+            found.update(set__tags=tags)
+            found.update(set__description=description)
+
+            cat = Category.objects(id=category)
+            found.update(set__category=cat[0].id)
+
+            resp.body = "OK"
+        except:
+            resp.body = "ERROR"
+
+
+editcategory    = EditCategory()
+editartifact    = EditArtifact()
+
+
+api.add_route('/categories/edit', editcategory)
+api.add_route('/artifacts/edit', editartifact)
+
+################
+
+
+class RemoveCategory(object):
+    def on_post(self, req, resp):
+        data        = json.loads(req.stream.read().decode("utf-8"))
+        id          = data['id']
+
+        try:
+            found       = Category.objects(id=id)
+            found.delete()
+            resp.body = "OK"
+        except:
+            resp.body = "ERROR"
+
+class RemoveArtifact(object):
+    def on_post(self, req, resp):
+        data        = json.loads(req.stream.read().decode("utf-8"))
+        id          = data['id']
+
+        try:
+            found       = Artifact.objects(id=id)
+            try:
+                found.delete()
+                resp.body = "OK"
+            except:
+                resp.body = "ERROR"
+        except:
+            resp.body = "NOOBJ"
+
+class RemoveMedia(object):
+    def on_post(self, req, resp):
+        data        = json.loads(req.stream.read().decode("utf-8"))
+        id          = data['id']
+
+        try:
+            found       = Media.objects(id=id)
+            try:
+                found.delete()
+                resp.body = "OK"
+            except:
+                resp.body = "ERROR"
+        except:
+            resp.body = "NOOBJ"
+
+
+
+removecategory = RemoveCategory()
+removeartifact = RemoveArtifact()
+removemedia    = RemoveMedia()
+
+
+api.add_route('/categories/remove', removecategory)
+api.add_route('/artifacts/remove', removeartifact)
+api.add_route('/media/remove', removemedia)
 
 # EOF
