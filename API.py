@@ -3,6 +3,9 @@ from db import *
 from falcon_multipart.middleware import MultipartMiddleware
 from falcon_cors import CORS
 import base64
+from PIL import Image
+import numpy as np
+import io
 
 cors = CORS(allow_all_origins=True,
             allow_all_headers=True,
@@ -44,14 +47,29 @@ class FetchAllArtifact(object):
 
 class FetchMedia(object):
     def on_get(self, req, resp, id):
+        doc = Media.objects(id=id)[0]
+        img = base64.decodestring(doc.source.read())
+
+        resp.content_type = 'image/png'
+        resp.body = img
+
+class FetchMediaThumb(object):
+    def on_get(self, req, resp, id):
+        doc = Media.objects(id=id)[0]
+        img = base64.decodestring(doc.thumbnail.read())
+
+        resp.content_type = 'image/png'
+        resp.body = img
+
+class FetchAllMedia(object):
+    def on_get(self, req, resp, id):
         doc = Media.objects(id=id).to_json(indent=2)
         resp.body = doc
 
-class ShowMedia(object):
+class FetchArtifactMedia(object):
     def on_get(self, req, resp, id):
-        doc = Media.objects(id=id)[0]
-        #resp.body = doc.header+doc.source.read().decode()
-        resp.body = base64.decodestring(doc.source.read())
+        doc = Media.objects(artifact=id).to_json(indent=2)
+        resp.body = doc
 
 class FetchAllMedia(object):
     def on_get(self, req, resp):
@@ -66,16 +84,21 @@ singlecategory = FetchCategory()
 allcategories  = FetchAllCategories()
 singleartifact = FetchArtifact()
 allartifacts   = FetchAllArtifact()
-singlemedia    = FetchMedia()
-showmedia      = ShowMedia()
 allmedia       = FetchAllMedia()
+singlemedia    = FetchMedia()
+singlethumb    = FetchMediaThumb()
+allmedia       = FetchAllMedia()
+artifactmedia  = FetchArtifactMedia()
+
 
 api.add_route('/categories/{id}', singlecategory)
 api.add_route('/categories', allcategories)
 api.add_route('/artifacts/{id}', singleartifact)
 api.add_route('/artifacts', allartifacts)
+api.add_route('/artifacts/{id}/media', artifactmedia)
 api.add_route('/media/{id}', singlemedia)
-api.add_route('/mediashow/{id}', showmedia)
+api.add_route('/mediashow/{id}', singlemedia)
+api.add_route('/thumbshow/{id}', singlethumb)
 api.add_route('/media', allmedia)
 
 ################## CREATE
@@ -99,14 +122,19 @@ class CreateMedia(object):
         artifact    = data['artifact']
         description = data['description']
         media       = data['media'].split(",")[1] if data['media'] else ""
+        thumbnail   = data['thumbnail'].split(",")[1] if data['thumbnail'] else ""
         header      = data['media'].split(",")[0] + "," if data['media'] else ""
 
         med = Media(language=language, mediatype=mediatype, description=description, artifact=artifact, header=header)
         #rawdata     = base64.decodestring(media.encode())
         med.source.put(media.encode())
+        try:
+            med.thumbnail.put(thumbnail.encode())
+        except:
+            pass
         med.save()
 
-        resp.body = header+med.source.read().decode()
+        resp.body = str(med.id)#header+med.source.read().decode()
 
 class CreateArtifact(object):
     def on_post(self, req, resp):

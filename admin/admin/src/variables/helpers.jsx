@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const APIURL               = "http://51.15.130.186:7778";
+export const APIURL               = "http://localhost:8000";//"http://51.15.130.186:7778";
 
 export const CATEGORIESPAGE       = "/categories";
 export const ARTIFACTSPAGE        = "/artifacts";
@@ -75,20 +75,6 @@ export const APIremovecategory = (inp, id) => {
 
 
 ////////////////////////////// artifacts
-
-export const APIaddmedia = (inp) => {
-  APIcreate('/media/create',
-            {'media': inp.state.media,
-             'lang': inp.state.lang,
-             'mediatype': inp.state.mediatype,
-             'description': inp.state.description,
-            },
-    (r) => {
-      console.log("Medya eklendi");
-      inp.props.history.push(EDITMEDIAPAGE)
-    },
-    (r) => {console.log(r)})
-}
 
 export const APInewartifact = (inp) => {
   let tags = [];

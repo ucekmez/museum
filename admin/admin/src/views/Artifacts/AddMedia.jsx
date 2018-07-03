@@ -16,7 +16,7 @@ import Card from "components/Card/Card.jsx";
 import CardHeader from "components/Card/CardHeader.jsx";
 import CardBody from "components/Card/CardBody.jsx";
 import CardFooter from "components/Card/CardFooter.jsx";
-import { APIfetch, ARTIFACTSPAGE, APIURL, LANGS, styles, APIaddmedia, APIremovemedia } from "variables/helpers";
+import { APIfetch, ARTIFACTSPAGE, APIURL, LANGS, styles, APIremovemedia } from "variables/helpers";
 import defaultImage from "assets/img/image_placeholder.jpg";
 import Dropzone from 'react-dropzone';
 import axios from 'axios';
@@ -34,7 +34,10 @@ import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
 import Edit from "@material-ui/icons/Edit";
 
-var base64js = require('base64-js')
+var resizebase64 = require('resize-base64');
+
+const THUMBWIDTH  = 256;
+const THUMBHEIGHT = 256;
 
 class AddMedia extends React.Component {
   state = {
@@ -44,6 +47,7 @@ class AddMedia extends React.Component {
     description: "",
     media: "",
     thumbnail: "",
+    resized: "",
     lang: "",
     allmedia: []
   };
@@ -60,8 +64,7 @@ class AddMedia extends React.Component {
         this.props.history.push(ARTIFACTSPAGE)
       })
 
-
-    APIfetch('/media',
+    APIfetch('/artifacts/'+fetched_id+'/media',
       (r) => {
         const allmedia = [];
         const { classes } = this.props;
@@ -69,11 +72,10 @@ class AddMedia extends React.Component {
           [data['id'], data['mediatype'], data['language']]
         ))
         this.setState({'allmedia': allmedia})
-        console.log(this.state.allmedia)
       },
       (r) => {console.log(r)})
-
   }
+
 
   handleTypeChange        = (e) => { this.setState({ type: e.target.value }); }
   handleDescriptionChange = (e) => { this.setState({ description: e.target.value }); }
@@ -85,22 +87,45 @@ class AddMedia extends React.Component {
 
   addMedia = () => {
     const url = APIURL+"/media/create";
-    let data = {
-      "media": this.state.image,
-      "language": this.state.lang,
-      "mediatype": this.state.type,
-      "description": this.state.description,
-      "artifact": this.state.id
-    }
-    console.log(data)
 
-    let config = {}
-    const _this = this
-    axios.post(url, {"data": data}, config)
-      .then(function(response){
-        console.log(response)
-        _this.setState({'thumbnail': response.data})
-      })
+    try {
+      this.setState({'resized': resizebase64(this.state.media, THUMBWIDTH, THUMBHEIGHT)}, () => {
+        let data = {
+          "media": this.state.media,
+          "thumbnail": this.state.resized,
+          "language": this.state.lang,
+          "mediatype": this.state.type,
+          "description": this.state.description,
+          "artifact": this.state.id
+        }
+
+        let config = {}
+        const _this = this
+        axios.post(url, {"data": data}, config)
+          .then(function(response){
+            console.log(response)
+            //_this.setState({'thumbnail': response.data})
+          })
+    });
+    } catch (err) {
+      console.log(err)
+      let data = {
+        "media": this.state.media,
+        "thumbnail": "",
+        "language": this.state.lang,
+        "mediatype": this.state.type,
+        "description": this.state.description,
+        "artifact": this.state.id
+      }
+
+      let config = {}
+      const _this = this
+      axios.post(url, {"data": data}, config)
+        .then(function(response){
+          console.log(response)
+          //_this.setState({'thumbnail': response.data})
+        })
+    }
   }
 
   render() {
@@ -125,7 +150,7 @@ class AddMedia extends React.Component {
                         tableData={this.state.allmedia.map((data, index) => {
                           return [
                             <div className={classes.imgContainer}>
-                              <img src={APIURL+"/mediashow/"+data[0]} alt="..." className={classes.img} style={{'width':'50px'}} />
+                              <img src={APIURL+"/thumbshow/"+data[0]} alt="..." className={classes.img} style={{'width':'50px'}} />
                             </div>,
                             <span>
                               <a className={classes.tdNameAnchor}>
@@ -181,7 +206,7 @@ class AddMedia extends React.Component {
                                     const reader = new FileReader();
                                     reader.onload = function(event) {
                                       //console.log(event.target.result);
-                                      _this.setState({'image': event.target.result})
+                                      _this.setState({'media': event.target.result})
                                       };
                                       reader.readAsDataURL(file)
                                   })
