@@ -13,8 +13,8 @@ RUN apt-get install -y --no-install-recommends \
 
 RUN npm install -g serve
 
-COPY ./web /web
-WORKDIR /web
+COPY ./admin /admin
+WORKDIR /admin
 
 RUN npm install
 RUN npm run build
