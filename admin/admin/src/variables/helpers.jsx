@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const APIURL               = "http://localhost:8000";
+export const APIURL               = "http://51.15.130.186:7778";
 
 export const CATEGORIESPAGE       = "/categories";
 export const ARTIFACTSPAGE        = "/artifacts";
