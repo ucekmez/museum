@@ -21,6 +21,11 @@ class CategoryTranslation(gj.Document):
     category    = ReferenceField(Category, reverse_delete_rule=CASCADE)
     meta        = {'indexes': [{'fields': ['$title', '$description']}]}
 
+class Language(gj.Document):
+    title       = StringField(max_length=64, required=True)
+    code        = StringField(required=True)
+
+
 class Artifact(gj.Document):
     title       = StringField(max_length=64)
     qr_id       = StringField(max_length=32)

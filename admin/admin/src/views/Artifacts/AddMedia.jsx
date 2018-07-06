@@ -21,23 +21,12 @@ import defaultImage from "assets/img/image_placeholder.jpg";
 import Dropzone from 'react-dropzone';
 import axios from 'axios';
 
-import product1 from "assets/img/product1.jpg";
-import CardIcon from "components/Card/CardIcon.jsx";
-import Assignment from "@material-ui/icons/Assignment";
 import Close from "@material-ui/icons/Close";
-import Remove from "@material-ui/icons/Remove";
-import Add from "@material-ui/icons/Add";
-import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
 import Table from "components/Table/Table.jsx";
 
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
-import Edit from "@material-ui/icons/Edit";
 
-var resizebase64 = require('resize-base64');
-
-const THUMBWIDTH  = 256;
-const THUMBHEIGHT = 256;
 
 class AddMedia extends React.Component {
   state = {
@@ -49,7 +38,9 @@ class AddMedia extends React.Component {
     thumbnail: "",
     resized: "",
     lang: "",
-    allmedia: []
+    allmedia: [],
+    yuklebutton: "YÜKLE",
+    yukledisabled: false,
   };
 
   componentDidMount(prevProps) {
@@ -67,9 +58,8 @@ class AddMedia extends React.Component {
     APIfetch('/artifacts/'+fetched_id+'/media',
       (r) => {
         const allmedia = [];
-        const { classes } = this.props;
         r.data.map((data, index) => allmedia.push(
-          [data['id'], data['mediatype'], data['language']]
+          [data['id'], data['mediatype'], data['language'], data['description']]
         ))
         this.setState({'allmedia': allmedia})
       },
@@ -86,46 +76,29 @@ class AddMedia extends React.Component {
    }
 
   addMedia = () => {
+    this.setState({'yuklebutton': "LÜTFEN BEKLEYİN..."})
+    this.setState({'yukledisabled': true})
     const url = APIURL+"/media/create";
 
-    try {
-      this.setState({'resized': resizebase64(this.state.media, THUMBWIDTH, THUMBHEIGHT)}, () => {
-        let data = {
-          "media": this.state.media,
-          "thumbnail": this.state.resized,
-          "language": this.state.lang,
-          "mediatype": this.state.type,
-          "description": this.state.description,
-          "artifact": this.state.id
-        }
-
-        let config = {}
-        const _this = this
-        axios.post(url, {"data": data}, config)
-          .then(function(response){
-            console.log(response)
-            //_this.setState({'thumbnail': response.data})
-          })
-    });
-    } catch (err) {
-      console.log(err)
-      let data = {
-        "media": this.state.media,
-        "thumbnail": "",
-        "language": this.state.lang,
-        "mediatype": this.state.type,
-        "description": this.state.description,
-        "artifact": this.state.id
-      }
-
-      let config = {}
-      const _this = this
-      axios.post(url, {"data": data}, config)
-        .then(function(response){
-          console.log(response)
-          //_this.setState({'thumbnail': response.data})
-        })
+    let data = {
+      "media": this.state.media,
+      "language": this.state.lang,
+      "mediatype": this.state.type,
+      "description": this.state.description,
+      "artifact": this.state.id
     }
+
+    let config = {}
+    const _this = this;
+    axios.post(url, {"data": data}, config)
+      .then(function(response){
+        const data = response.data
+        _this.setState(prevState => ({
+          allmedia: [...prevState.allmedia, [data['id'], data['mediatype'], data['language'], data['description']]],
+          yuklebutton: "YÜKLE",
+          yukledisabled: false
+        }))
+      })
   }
 
   render() {
@@ -163,7 +136,7 @@ class AddMedia extends React.Component {
                             </span>,
                             <span>
                               <small className={classes.tdNameSmall}>
-                                {data[0]}
+                                {data[3].substring(0, 30)+' ...'}
                               </small>
                             </span>,
                             <div>
@@ -196,19 +169,21 @@ class AddMedia extends React.Component {
               <CardBody>
                 <Grid container>
                   <GridItem xs={12} sm={12} md={12}>
-                      <Dropzone style={{'width': '100%', 'minHeight': '200px', }} accept="image/jpeg, image/png,  video/mp4, audio/wav"
+                      <Dropzone style={{'width': '100%', 'minHeight': '200px', }}
+                                accept="image/jpeg, image/png,  video/mp4, audio/wav"
                                 ref={(node) => { dropzoneRef = node; }}
                                 onDrop={(accepted, rejected) => {
                                   accepted.forEach(file => {
                                     this.setState({'thumbnail': file.preview})
-
+                                    //console.log(file)
                                     const _this = this;
                                     const reader = new FileReader();
                                     reader.onload = function(event) {
-                                      //console.log(event.target.result);
-                                      _this.setState({'media': event.target.result})
-                                      };
-                                      reader.readAsDataURL(file)
+                                      _this.setState((prevState) => {
+                                        return {media: event.target.result};
+                                      });
+                                    };
+                                    reader.readAsDataURL(file)
                                   })
                                 }}>
                           <img id="mediaimage" src={this.state.thumbnail} style={{'width': '100%'}} alt=""/>
@@ -306,7 +281,7 @@ class AddMedia extends React.Component {
                 </Grid>
               </CardBody>
               <CardFooter>
-                <Button fullWidth={true} onClick={this.addMedia} color="success">Yükle</Button>
+                <Button disabled={(this.state.yukledisabled)? "disabled" : ""} id="yukle_button" fullWidth={true} onClick={this.addMedia} color="success">{this.state.yuklebutton}</Button>
               </CardFooter>
             </Card>
           </GridItem>

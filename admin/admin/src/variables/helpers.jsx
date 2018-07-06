@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const APIURL               = "http://51.15.130.186:7778";
+export const APIURL               = "http://localhost:8000";//"http://51.15.130.186:7778";
 
 export const CATEGORIESPAGE       = "/categories";
 export const ARTIFACTSPAGE        = "/artifacts";
@@ -9,6 +9,10 @@ export const NEWARTIFACTPAGE      = "/newartifact";
 export const EDITCATEGORYPAGE     = "/editcategory";
 export const EDITARTIFACTPAGE     = "/editartifact";
 export const EDITMEDIAPAGE        = "/artifactmedia";
+
+export const LANGUAGESPAGE        = "/languages";
+export const NEWLANGUAGEPAGE      = "/newlanguage";
+export const EDITLANGUAGEPAGE     = "/editlanguage";
 
 export const LANGS = [
   {"code": "tr", "lang": "Türkçe"},
@@ -73,6 +77,38 @@ export const APIremovecategory = (inp, id) => {
     (r) => {console.log(r)})
 }
 
+////////////////////////////// languages
+
+export const APInewlanguage = (inp) => {
+  APIcreate('/languages/create',
+            {'title': inp.state.title, 'code': inp.state.code},
+    (r) => {
+      console.log("Dil eklendi");
+      inp.props.history.push(LANGUAGESPAGE)
+    },
+    (r) => {console.log(r)})
+}
+
+export const APIeditlanguage = (inp) => {
+  APIcreate('/languages/edit',
+            {'id': inp.state.id, 'title': inp.state.title, 'code': inp.state.code},
+    (r) => {
+      console.log("Dil düzenlendi");
+      inp.props.history.push(LANGUAGESPAGE)
+    },
+    (r) => {console.log(r)})
+}
+
+
+export const APIremovelanguage = (inp, id) => {
+  APIcreate('/languages/remove', {'id': id, },
+    (r) => {
+      console.log("Dil silindi");
+      //window.location.reload()
+      inp.props.history.push(LANGUAGESPAGE)
+    },
+    (r) => {console.log(r)})
+}
 
 ////////////////////////////// artifacts
 

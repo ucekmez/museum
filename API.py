@@ -32,6 +32,20 @@ class FetchAllCategories(object):
         resp.set_header('X-Total-Count', count)
         resp.body = doc
 
+class FetchLanguage(object):
+    def on_get(self, req, resp, id):
+        doc = Language.objects(id=id).to_json(indent=2)
+        resp.body = doc
+
+class FetchAllLanguages(object):
+    def on_get(self, req, resp):
+        result = Language.objects()
+        doc    = result.to_json(indent=2)
+        count  = result.count()
+        resp.set_header('X-Total-Count', count)
+        resp.body = doc
+
+
 class FetchArtifact(object):
     def on_get(self, req, resp, id):
         doc = Artifact.objects(id=id).to_json(indent=2)
@@ -45,6 +59,12 @@ class FetchAllArtifact(object):
         resp.set_header('X-Total-Count', count)
         resp.body = doc
 
+
+class FetchMediaObject(object):
+    def on_get(self, req, resp, id):
+        doc = Media.objects(id=id).to_json(indent=2)
+        resp.body = doc
+
 class FetchMedia(object):
     def on_get(self, req, resp, id):
         doc = Media.objects(id=id)[0]
@@ -56,7 +76,7 @@ class FetchMedia(object):
 class FetchMediaThumb(object):
     def on_get(self, req, resp, id):
         doc = Media.objects(id=id)[0]
-        img = base64.decodestring(doc.thumbnail.read())
+        img = doc.thumbnail.read()
 
         resp.content_type = 'image/png'
         resp.body = img
@@ -82,10 +102,13 @@ class FetchAllMedia(object):
 
 singlecategory = FetchCategory()
 allcategories  = FetchAllCategories()
+singlelanguage = FetchLanguage()
+alllanguages   = FetchAllLanguages()
 singleartifact = FetchArtifact()
 allartifacts   = FetchAllArtifact()
 allmedia       = FetchAllMedia()
 singlemedia    = FetchMedia()
+mediaobject    = FetchMediaObject()
 singlethumb    = FetchMediaThumb()
 allmedia       = FetchAllMedia()
 artifactmedia  = FetchArtifactMedia()
@@ -93,10 +116,12 @@ artifactmedia  = FetchArtifactMedia()
 
 api.add_route('/categories/{id}', singlecategory)
 api.add_route('/categories', allcategories)
+api.add_route('/languages/{id}', singlelanguage)
+api.add_route('/languages', alllanguages)
 api.add_route('/artifacts/{id}', singleartifact)
 api.add_route('/artifacts', allartifacts)
 api.add_route('/artifacts/{id}/media', artifactmedia)
-api.add_route('/media/{id}', singlemedia)
+api.add_route('/media/{id}', mediaobject)
 api.add_route('/mediashow/{id}', singlemedia)
 api.add_route('/thumbshow/{id}', singlethumb)
 api.add_route('/media', allmedia)
@@ -113,6 +138,18 @@ class CreateCategory(object):
 
         resp.body = "OK"
 
+
+class CreateLanguage(object):
+    def on_post(self, req, resp):
+        data        = json.loads(req.stream.read().decode("utf-8"))
+        title       = data['title']       if 'title' in data and data['title'] != "" else "Belirtilmedi!"
+        code        = data['code']        if 'code' in data else "yok"
+        lang        = Language(title=title, code=code)
+        lang.save()
+
+        resp.body = "OK"
+
+
 class CreateMedia(object):
     def on_post(self, req, resp):
         data        = json.loads(req.stream.read().decode("utf-8"))['data']
@@ -122,19 +159,25 @@ class CreateMedia(object):
         artifact    = data['artifact']
         description = data['description']
         media       = data['media'].split(",")[1] if data['media'] else ""
-        thumbnail   = data['thumbnail'].split(",")[1] if data['thumbnail'] else ""
         header      = data['media'].split(",")[0] + "," if data['media'] else ""
 
         med = Media(language=language, mediatype=mediatype, description=description, artifact=artifact, header=header)
         #rawdata     = base64.decodestring(media.encode())
         med.source.put(media.encode())
-        try:
-            med.thumbnail.put(thumbnail.encode())
-        except:
-            pass
         med.save()
 
-        resp.body = str(med.id)#header+med.source.read().decode()
+
+        with open("/tmp/{}.png".format(med.id), "wb") as f:
+            f.write(base64.decodebytes(med.source.read()))
+        tmp_img   = Image.open("/tmp/{}.png".format(med.id))
+        tmp_img.thumbnail((256, 256))
+        tmp_img.save("/tmp/{}_thumb.png".format(med.id))
+        with open("/tmp/{}_thumb.png".format(med.id), "rb") as f:
+            med.thumbnail.put(f, content_type='image/png')
+            med.save()
+
+
+        resp.body = med.to_json()
 
 class CreateArtifact(object):
     def on_post(self, req, resp):
@@ -200,6 +243,7 @@ class CreateArtifactTranslation(object):
 
 
 createcategory = CreateCategory()
+createlanguage = CreateLanguage()
 createmedia    = CreateMedia()
 createartifact = CreateArtifact()
 createcategorytranslation = CreateCategoryTranslation()
@@ -207,6 +251,7 @@ createartifacttranslation = CreateArtifactTranslation()
 
 
 api.add_route('/categories/create', createcategory)
+api.add_route('/languages/create', createlanguage)
 api.add_route('/categories/translation/create', createcategorytranslation)
 api.add_route('/media/create', createmedia)
 api.add_route('/artifacts/create', createartifact)
@@ -229,6 +274,23 @@ class EditCategory(object):
             found             = Category.objects(id=id)
             found.update(set__title=title)
             found.update(set__description=description)
+
+
+            resp.body = "OK"
+        except:
+            resp.body = "ERROR"
+
+class EditLanguage(object):
+    def on_post(self, req, resp):
+        data        = json.loads(req.stream.read().decode("utf-8"))
+        id          = data['id']
+        title       = data['title'] if data['title'] != "" else "Belirtilmedi!"
+        code        = data['code']
+
+        try:
+            found             = Language.objects(id=id)
+            found.update(set__title=title)
+            found.update(set__code=code)
 
 
             resp.body = "OK"
@@ -264,10 +326,12 @@ class EditArtifact(object):
 
 
 editcategory    = EditCategory()
+editlanguage    = EditLanguage()
 editartifact    = EditArtifact()
 
 
 api.add_route('/categories/edit', editcategory)
+api.add_route('/languages/edit', editlanguage)
 api.add_route('/artifacts/edit', editartifact)
 
 ################
@@ -280,6 +344,18 @@ class RemoveCategory(object):
 
         try:
             found       = Category.objects(id=id)
+            found.delete()
+            resp.body = "OK"
+        except:
+            resp.body = "ERROR"
+
+class RemoveLanguage(object):
+    def on_post(self, req, resp):
+        data        = json.loads(req.stream.read().decode("utf-8"))
+        id          = data['id']
+
+        try:
+            found       = Language.objects(id=id)
             found.delete()
             resp.body = "OK"
         except:
@@ -318,11 +394,13 @@ class RemoveMedia(object):
 
 
 removecategory = RemoveCategory()
+removelanguage = RemoveLanguage()
 removeartifact = RemoveArtifact()
 removemedia    = RemoveMedia()
 
 
 api.add_route('/categories/remove', removecategory)
+api.add_route('/languages/remove', removelanguage)
 api.add_route('/artifacts/remove', removeartifact)
 api.add_route('/media/remove', removemedia)
 

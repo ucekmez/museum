@@ -8,6 +8,10 @@ import CategoryList from "views/Categories/CategoryList.jsx";
 import NewCategory from "views/Categories/NewCategory.jsx";
 import EditCategory from "views/Categories/EditCategory.jsx";
 
+import LanguageList from "views/Languages/LanguageList.jsx";
+import NewLanguage from "views/Languages/NewLanguage.jsx";
+import EditLanguage from "views/Languages/EditLanguage.jsx";
+
 import ArtifactList from "views/Artifacts/ArtifactList.jsx";
 import NewArtifact from "views/Artifacts/NewArtifact.jsx";
 import EditArtifact from "views/Artifacts/EditArtifact.jsx";
@@ -42,6 +46,29 @@ const dashboardRoutes = [
     navbarName: "Kategori Düzenle",
     icon: DashboardIcon,
     component: EditCategory,
+    invisible: true
+  },
+  {
+    path: "/languages",
+    sidebarName: "Diller",
+    navbarName: "Diller",
+    icon: DashboardIcon,
+    component: LanguageList
+  },
+  {
+    path: "/newlanguage",
+    sidebarName: "Dil Ekle",
+    navbarName: "Dil Ekle",
+    icon: DashboardIcon,
+    component: NewLanguage,
+    invisible: true
+  },
+  {
+    path: "/editlanguage/:id",
+    sidebarName: "Dil Düzenle",
+    navbarName: "Dil Düzenle",
+    icon: DashboardIcon,
+    component: EditLanguage,
     invisible: true
   },
   {
