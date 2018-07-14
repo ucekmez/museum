@@ -29,9 +29,9 @@ ADD ./api /api
 WORKDIR /api
 RUN pip install --no-cache -r requirements.txt --upgrade # python3
 
-EXPOSE 8000
+EXPOSE 7778
 
-ENTRYPOINT gunicorn --reload API
+CMD ["/usr/local/bin/gunicorn" "-b" "0.0.0.0:7778" "--reload" "API:API"]
 
 
 
