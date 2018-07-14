@@ -24,13 +24,11 @@ RUN ln -s -f /usr/bin/python3 /usr/bin/python
 # Install pip
 RUN wget https://bootstrap.pypa.io/get-pip.py && python get-pip.py && rm get-pip.py
 
-# install dev packages from requirements.txt
-COPY requirements.txt requirements.txt
-RUN pip install --no-cache -r requirements.txt --upgrade # python3
-
 
 ADD ./api /api
 WORKDIR /api
+RUN pip install --no-cache -r requirements.txt --upgrade # python3
+
 
 EXPOSE 8000
 
