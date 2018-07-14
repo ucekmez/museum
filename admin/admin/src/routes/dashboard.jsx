@@ -8,6 +8,10 @@ import CategoryList from "views/Categories/CategoryList.jsx";
 import NewCategory from "views/Categories/NewCategory.jsx";
 import EditCategory from "views/Categories/EditCategory.jsx";
 
+import CTList from "views/Categories/Translations/CTList.jsx";
+import NewCT from "views/Categories/Translations/NewCT.jsx";
+import EditCT from "views/Categories/Translations/EditCT.jsx";
+
 import LanguageList from "views/Languages/LanguageList.jsx";
 import NewLanguage from "views/Languages/NewLanguage.jsx";
 import EditLanguage from "views/Languages/EditLanguage.jsx";
@@ -49,29 +53,6 @@ const dashboardRoutes = [
     invisible: true
   },
   {
-    path: "/languages",
-    sidebarName: "Diller",
-    navbarName: "Diller",
-    icon: DashboardIcon,
-    component: LanguageList
-  },
-  {
-    path: "/newlanguage",
-    sidebarName: "Dil Ekle",
-    navbarName: "Dil Ekle",
-    icon: DashboardIcon,
-    component: NewLanguage,
-    invisible: true
-  },
-  {
-    path: "/editlanguage/:id",
-    sidebarName: "Dil Düzenle",
-    navbarName: "Dil Düzenle",
-    icon: DashboardIcon,
-    component: EditLanguage,
-    invisible: true
-  },
-  {
     path: "/artifacts",
     sidebarName: "Eserler",
     navbarName: "Eserler",
@@ -102,6 +83,55 @@ const dashboardRoutes = [
     component: AddMedia,
     invisible: true
   },
+  {
+    path: "/languages",
+    sidebarName: "Diller",
+    navbarName: "Diller",
+    icon: DashboardIcon,
+    component: LanguageList
+  },
+  {
+    path: "/newlanguage",
+    sidebarName: "Dil Ekle",
+    navbarName: "Dil Ekle",
+    icon: DashboardIcon,
+    component: NewLanguage,
+    invisible: true
+  },
+  {
+    path: "/editlanguage/:id",
+    sidebarName: "Dil Düzenle",
+    navbarName: "Dil Düzenle",
+    icon: DashboardIcon,
+    component: EditLanguage,
+    invisible: true
+  },
+  {
+    path: "/categorytranslations/:id",
+    sidebarName: "Kategori Çevirileri",
+    navbarName: "Kategori Çevirileri",
+    icon: DashboardIcon,
+    component: CTList,
+    invisible: true
+  },
+  {
+    path: "/newcategorytranslation/:id", // buradaki id : kategori id'si
+    sidebarName: "Kategori Çevirisi Ekle",
+    navbarName: "Kategori Çevirisi Ekle",
+    icon: DashboardIcon,
+    component: NewCT,
+    invisible: true
+  },
+  {
+    path: "/editcategorytranslation/:id", // buradaki id : ceviri id'si
+    sidebarName: "Kategori Çevirisi Düzenle",
+    navbarName: "Kategori Çevirisi Düzenle",
+    icon: DashboardIcon,
+    component: EditCT,
+    invisible: true
+  },
+
+
   { redirect: true, path: "/", to: "/dashboard", navbarName: "Redirect" }
 ];
 

@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-export const APIURL               = "http://localhost:8000";//"http://51.15.130.186:7778";
+export const APIURL               = "http://localhost:8000";
+//export const APIURL               = "http://51.15.130.186:7778";
 
 export const CATEGORIESPAGE       = "/categories";
 export const ARTIFACTSPAGE        = "/artifacts";
@@ -13,6 +14,10 @@ export const EDITMEDIAPAGE        = "/artifactmedia";
 export const LANGUAGESPAGE        = "/languages";
 export const NEWLANGUAGEPAGE      = "/newlanguage";
 export const EDITLANGUAGEPAGE     = "/editlanguage";
+
+export const CTSPAGE              = "/categorytranslations"
+export const NEWCTPAGE            = "/newcategorytranslation";
+export const EDITCTPAGE           = "/editcategorytranslation";
 
 export const LANGS = [
   {"code": "tr", "lang": "Türkçe"},
@@ -79,6 +84,8 @@ export const APIremovecategory = (inp, id) => {
 
 ////////////////////////////// languages
 
+
+
 export const APInewlanguage = (inp) => {
   APIcreate('/languages/create',
             {'title': inp.state.title, 'code': inp.state.code},
@@ -106,6 +113,41 @@ export const APIremovelanguage = (inp, id) => {
       console.log("Dil silindi");
       //window.location.reload()
       inp.props.history.push(LANGUAGESPAGE)
+    },
+    (r) => {console.log(r)})
+}
+
+///////// catgory translations
+
+export const APInewct = (inp) => {
+  APIcreate('/categorytranslations/create/'+inp.state.category,
+            {'language': inp.state.language,
+             'title': inp.state.title,
+             'description': inp.state.description},
+    (r) => {
+      console.log("Çeviri eklendi");
+      inp.props.history.push(CTSPAGE + "/" + inp.state.category)
+    },
+    (r) => {console.log(r)})
+}
+
+export const APIeditct = (inp) => {
+  APIcreate('/categorytranslations/edit',
+            {'id': inp.state.id, 'title': inp.state.title, 'description': inp.state.description, 'language': inp.state.language},
+    (r) => {
+      console.log("Çeviri düzenlendi");
+      inp.props.history.push(CTSPAGE + "/" + inp.state.category)
+    },
+    (r) => {console.log(r)})
+}
+
+
+export const APIremovect = (inp, id, idc) => {
+  APIcreate('/categorytranslations/remove', {'id': id, },
+    (r) => {
+      console.log("Çeviri silindi");
+      //window.location.reload()
+      inp.props.history.push(CTSPAGE + "/" + idc)
     },
     (r) => {console.log(r)})
 }
