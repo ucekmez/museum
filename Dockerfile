@@ -29,17 +29,12 @@ COPY requirements.txt requirements.txt
 RUN pip install --no-cache -r requirements.txt --upgrade # python3
 
 
-WORKDIR /app
-
-COPY ./test-admin test-admin
-COPY ./__init__.py __init__.py
-COPY ./API.py API.py
-COPY ./db.py db.py
-COPY ./mongoengine_goodjson mongoengine_goodjson
+ADD ./api /api
+WORKDIR /api
 
 EXPOSE 8000
 
-ENTRYPOINT gunicorn --reload API
+ENTRYPOINT gunicorn 0.0.0.0:8000 --reload API
 
 
 
