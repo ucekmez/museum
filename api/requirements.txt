@@ -5,3 +5,5 @@ falcon-multipart
 falcon-cors
 requests
 python-dateutil
+Pillow
+numpy
