@@ -31,7 +31,7 @@ RUN pip install --no-cache -r requirements.txt --upgrade # python3
 
 EXPOSE 8000
 
-#ENTRYPOINT gunicorn --reload API
+ENTRYPOINT gunicorn --reload API
 
 
 
