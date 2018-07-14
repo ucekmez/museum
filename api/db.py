@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 from mongoengine import *
 import datetime, json, requests, random, string
 import mongoengine_goodjson as gj

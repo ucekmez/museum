@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 import falcon
 from db import *
 from falcon_multipart.middleware import MultipartMiddleware
