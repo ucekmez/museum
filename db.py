@@ -7,6 +7,10 @@ connect('museumdbase', host='51.15.130.186', port=7779)
 def generateID():
     return ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])
 
+class Language(gj.Document):
+    title       = StringField(max_length=64, required=True)
+    code        = StringField(required=True)
+
 class Category(gj.Document):
     title       = StringField(max_length=64)
     description = StringField()
@@ -15,15 +19,12 @@ class Category(gj.Document):
     meta        = {'ordering': ['-created_at']}
 
 class CategoryTranslation(gj.Document):
-    language    = StringField(max_length=8, required=True)
-    title       = StringField(max_length=64)
-    description = StringField()
-    category    = ReferenceField(Category, reverse_delete_rule=CASCADE)
-    meta        = {'indexes': [{'fields': ['$title', '$description']}]}
-
-class Language(gj.Document):
-    title       = StringField(max_length=64, required=True)
-    code        = StringField(required=True)
+    category       = ReferenceField(Category, reverse_delete_rule=CASCADE)
+    language_code  = StringField(max_length=4)
+    language_title = StringField(max_length=16)
+    title          = StringField(max_length=64)
+    description    = StringField()
+    meta           = {'indexes': [{'fields': ['$title', '$description']}]}
 
 
 class Artifact(gj.Document):
@@ -40,12 +41,13 @@ class Artifact(gj.Document):
     meta        = {'allow_inheritance': True, 'ordering': ['-created_at'], 'strict': False}
 
 class ArtifactTranslation(gj.Document):
-    language    = StringField(max_length=8, required=True)
-    title       = StringField(max_length=64)
-    description = StringField()
-    extra       = StringField()
-    artifact    = ReferenceField(Artifact, reverse_delete_rule=CASCADE)
-    meta        = {'indexes': [{'fields': ['$title', '$description']}]}
+    artifact       = ReferenceField(Artifact, reverse_delete_rule=CASCADE)
+    language_code  = StringField(max_length=4)
+    language_title = StringField(max_length=16)
+    title          = StringField(max_length=64)
+    description    = StringField()
+    extra          = StringField()
+    meta           = {'indexes': [{'fields': ['$title', '$description', '$extra']}]}
 
 
 class Media(gj.Document):

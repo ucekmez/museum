@@ -16,7 +16,7 @@ import Card from "components/Card/Card.jsx";
 import CardHeader from "components/Card/CardHeader.jsx";
 import CardBody from "components/Card/CardBody.jsx";
 import CardFooter from "components/Card/CardFooter.jsx";
-import { APIfetch, ARTIFACTSPAGE, APIURL, LANGS, styles, APIremovemedia } from "variables/helpers";
+import { APIfetch, ARTIFACTSPAGE, APIURL, styles, APIremovemedia } from "variables/helpers";
 import defaultImage from "assets/img/image_placeholder.jpg";
 import Dropzone from 'react-dropzone';
 import axios from 'axios';
@@ -41,6 +41,7 @@ class AddMedia extends React.Component {
     allmedia: [],
     yuklebutton: "YÜKLE",
     yukledisabled: false,
+    languages: []
   };
 
   componentDidMount(prevProps) {
@@ -64,6 +65,12 @@ class AddMedia extends React.Component {
         this.setState({'allmedia': allmedia})
       },
       (r) => {console.log(r)})
+
+      APIfetch('/languages',
+        (r) => {
+          this.setState({'languages': r.data}, () => {})
+        },
+        (r) => { console.log(r)} )
   }
 
 
@@ -247,7 +254,7 @@ class AddMedia extends React.Component {
                         onChange={this.handleLangChange}
                         inputProps={{ name: "selectlang", id: "lang" }}>
 
-                        {LANGS.map(function(data, index){
+                        {this.state.languages.map(function(data, index){
                           return <MenuItem
                             key={data.code}
                             classes={{
@@ -255,7 +262,7 @@ class AddMedia extends React.Component {
                               selected: classes.selectMenuItemSelected
                             }}
                             value={data.code}>
-                            {data.lang}
+                            {data.title}
                           </MenuItem>
                         })}
                       </Select>

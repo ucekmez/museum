@@ -26,6 +26,7 @@ class NewArtifact extends React.Component {
     qr_id: "",
     ibeacon_id: "",
     description: "",
+    extra: "",
     tags: "",
     categories: []
   };
@@ -46,6 +47,7 @@ class NewArtifact extends React.Component {
   handleTagsChange        = (e) => { this.setState({ tags: e.target.value }); }
   handleCategoryChange    = (e) => { this.setState({ category: e.target.value }); }
   handleDescriptionChange = (e) => { this.setState({ description: e.target.value }); }
+  handleExtraChange       = (e) => { this.setState({ extra: e.target.value }); }
 
 
   render() {
@@ -152,6 +154,23 @@ class NewArtifact extends React.Component {
                       onChange={this.handleDescriptionChange}
                       labelText="Eser hakkında açıklama yazısı burada yer alacak."
                       id="description"
+                      formControlProps={{
+                        fullWidth: true
+                      }}
+                      inputProps={{
+                        multiline: true,
+                        rows: 5
+                      }}
+                    />
+                  </GridItem>
+                </Grid>
+                <Grid container>
+                  <GridItem xs={12} sm={12} md={12}>
+                    <InputLabel style={{ color: "#AAAAAA" }}>Ekstra</InputLabel>
+                    <CustomInput
+                      onChange={this.handleExtraChange}
+                      labelText="Eser hakkında ekstra bilgiler burada yer alacak."
+                      id="extra"
                       formControlProps={{
                         fullWidth: true
                       }}

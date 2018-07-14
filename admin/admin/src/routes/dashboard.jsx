@@ -12,6 +12,10 @@ import CTList from "views/Categories/Translations/CTList.jsx";
 import NewCT from "views/Categories/Translations/NewCT.jsx";
 import EditCT from "views/Categories/Translations/EditCT.jsx";
 
+import ATList from "views/Artifacts/Translations/ATList.jsx";
+import NewAT from "views/Artifacts/Translations/NewAT.jsx";
+import EditAT from "views/Artifacts/Translations/EditAT.jsx";
+
 import LanguageList from "views/Languages/LanguageList.jsx";
 import NewLanguage from "views/Languages/NewLanguage.jsx";
 import EditLanguage from "views/Languages/EditLanguage.jsx";
@@ -128,6 +132,30 @@ const dashboardRoutes = [
     navbarName: "Kategori Çevirisi Düzenle",
     icon: DashboardIcon,
     component: EditCT,
+    invisible: true
+  },
+  {
+    path: "/artifacttranslations/:id",
+    sidebarName: "Eser Çevirileri",
+    navbarName: "Eser Çevirileri",
+    icon: DashboardIcon,
+    component: ATList,
+    invisible: true
+  },
+  {
+    path: "/newartifacttranslation/:id", // buradaki id : kategori id'si
+    sidebarName: "Eser Çevirisi Ekle",
+    navbarName: "Eser Çevirisi Ekle",
+    icon: DashboardIcon,
+    component: NewAT,
+    invisible: true
+  },
+  {
+    path: "/editartifacttranslation/:id", // buradaki id : ceviri id'si
+    sidebarName: "Eser Çevirisi Düzenle",
+    navbarName: "Eser Çevirisi Düzenle",
+    icon: DashboardIcon,
+    component: EditAT,
     invisible: true
   },
 

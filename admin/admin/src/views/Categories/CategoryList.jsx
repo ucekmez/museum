@@ -42,16 +42,6 @@ class CategoryList extends React.Component {
            [data['id'], data['title'], data['description'],
            <div>
                  <Tooltip
-                     id="tooltip-top"
-                     title="Düzenle"
-                     placement="left"
-                     classes={{tooltip:classes.tooltip}}>
-                     <IconButton aria-label="Düzenle" className={classes.tableActionButton}
-                                 onClick={this.gotoEditCategoryPage.bind(this, data['id'])}>
-                         <Edit className={classes.tableActionButtonIcon + " " + classes.edit}/>
-                     </IconButton>
-                 </Tooltip>
-                 <Tooltip
                      id="tooltip-top-start"
                      title="Çeviriler"
                      placement="right"
@@ -59,6 +49,16 @@ class CategoryList extends React.Component {
                      <IconButton aria-label="Sil" className={classes.tableActionButton}
                                  onClick={this.categoryTranslations.bind(this, data['id'])}>
                          <Translate className={classes.tableActionButtonIcon + " " + classes.close}/>
+                     </IconButton>
+                 </Tooltip>
+                 <Tooltip
+                     id="tooltip-top"
+                     title="Düzenle"
+                     placement="left"
+                     classes={{tooltip:classes.tooltip}}>
+                     <IconButton aria-label="Düzenle" className={classes.tableActionButton}
+                                 onClick={this.gotoEditCategoryPage.bind(this, data['id'])}>
+                         <Edit className={classes.tableActionButtonIcon + " " + classes.edit}/>
                      </IconButton>
                  </Tooltip>
                  <Tooltip

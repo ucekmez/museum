@@ -11,89 +11,67 @@ import CustomInput from "components/CustomInput/CustomInput.jsx";
 import Button from "components/CustomButtons/Button.jsx";
 import Card from "components/Card/Card.jsx";
 import CardHeader from "components/Card/CardHeader.jsx";
-import CardBody from "components/Card/CardBody.jsx";
-import CardFooter from "components/Card/CardFooter.jsx";
-
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 
-import { APIeditct, APIfetch, CATEGORIESPAGE, styles } from "variables/helpers";
+import CardBody from "components/Card/CardBody.jsx";
+import CardFooter from "components/Card/CardFooter.jsx";
+import { APInewat, APIfetch, styles, ARTIFACTSPAGE } from "variables/helpers";
 
-class EditCT extends React.Component {
+
+class NewAT extends React.Component {
   state = {
-    id: "",
-    category: "",
-    language_code: "",
-    language_title: "",
-    title: "",
-    description: "",
-    languages: [],
-    language: "",
+    artifact: "",
     base_title: "",
     base_description: "",
-
+    base_extra: "",
+    languages: [],
+    language: "",
+    title: "",
+    description: "",
+    extra: "",
   };
 
   componentDidMount(prevProps) {
-    const fetched_id = this.props.match.params.id
-    APIfetch('/categorytranslation/' + fetched_id,
+    const fetched_artifact_id = this.props.match.params.id
+    this.setState({'artifact': fetched_artifact_id})
+
+    APIfetch('/languages',
       (r) => {
-        this.setState({'id': fetched_id})
-        this.setState({'language_code': r.data[0].language_code})
-        this.setState({'language_title': r.data[0].language_title})
-        this.setState({'title': r.data[0].title})
-        this.setState({'description': r.data[0].description})
-        this.setState({'category': r.data[0].category})
+        this.setState({'languages': r.data}, () => {
 
 
-
-        APIfetch('/languages',
-          (r) => {
-            this.setState({'languages': r.data}, () => {
-              APIfetch('/categorytranslations/' + this.state.category,
-                (cts) => {
-                  cts.data.map((ct, indexct) => {
-                    if (ct.language_code !== this.state.language_code) {
-                      this.setState({'languages': this.state.languages.filter((l, i) => l.code !== ct.language_code)})
-                    }else {
-                      this.state.languages.map((l, i) => {
-                        if (l.code == this.state.language_code) {
-                          this.setState({ language: l.id})
-                        }
-                      })
-                    }
+          APIfetch('/artifacttranslations/' + fetched_artifact_id,
+            (ats) => {
+              ats.data.map((at, indexat) => {
+                this.setState({'languages': this.state.languages.filter((l, i) => l.code !== at.language_code)})
+              })
+            },
+            (ats) => { console.log(ats)} )
 
 
+        })
 
-                  })
-
-                },
-                (cts) => { console.log(cts)} )
-            })
-
-
-          },
-          (r) => { console.log(r)} )
 
       },
-      (r) => {
-        this.props.history.push(CATEGORIESPAGE)
-      })
-      APIfetch('/categories/' + this.state.category,
+      (r) => { console.log(r)} )
+
+      APIfetch('/artifacts/' + fetched_artifact_id,
         (r) => {
           this.setState({'base_title': r.data[0].title})
           this.setState({'base_description': r.data[0].description})
+          this.setState({'base_extra': r.data[0].extra})
         },
         (r) => { console.log(r)} )
-
   }
 
-  editCT = () => { APIeditct(this) }
+  addnewAT = () => { APInewat(this) }
 
   handleTitleChange       = (e) => { this.setState({ title: e.target.value }); }
   handleLanguageChange    = (e) => { this.setState({ language: e.target.value }); }
   handleDescriptionChange = (e) => { this.setState({ description: e.target.value }); }
+  handleExtraChange = (e) => { this.setState({ extra: e.target.value }); }
 
 
   render() {
@@ -108,7 +86,7 @@ class EditCT extends React.Component {
               </CardHeader>
               <CardBody>
                 <Grid container>
-                  <div><h3>{ this.state.base_title }</h3></div>
+                  { this.state.base_title }
                 </Grid>
               </CardBody>
             </Card>
@@ -118,7 +96,17 @@ class EditCT extends React.Component {
               </CardHeader>
               <CardBody>
                 <Grid container>
-                  <div><p>{ this.state.base_description }</p></div>
+                  { this.state.base_description }
+                </Grid>
+              </CardBody>
+            </Card>
+            <Card>
+              <CardHeader color="warning">
+                <h4 className={classes.cardTitleWhite} style={{'color':'black'}}>Ekstra</h4>
+              </CardHeader>
+              <CardBody>
+                <Grid container>
+                  { this.state.base_extra }
                 </Grid>
               </CardBody>
             </Card>
@@ -126,7 +114,7 @@ class EditCT extends React.Component {
           <GridItem xs={12} sm={12} md={6}>
             <Card>
               <CardHeader color="warning">
-                <h4 className={classes.cardTitleWhite} style={{'color':'black'}}>Kategori Çevirisi Düzenle</h4>
+                <h4 className={classes.cardTitleWhite} style={{'color':'black'}}>Yeni Eser Çevirisi</h4>
                 <p className={classes.cardCategoryWhite} style={{'color':'black'}}>Lütfen tüm alanları doldurun.</p>
               </CardHeader>
               <CardBody>
@@ -176,7 +164,6 @@ class EditCT extends React.Component {
                     <CustomInput
                       onChange={this.handleTitleChange}
                       labelText="Başlık"
-                      value={this.state.title}
                       id="title"
                       formControlProps={{
                         fullWidth: true
@@ -194,7 +181,23 @@ class EditCT extends React.Component {
                       formControlProps={{
                         fullWidth: true
                       }}
-                      value={this.state.description}
+                      inputProps={{
+                        multiline: true,
+                        rows: 5
+                      }}
+                    />
+                  </GridItem>
+                </Grid>
+                <Grid container>
+                  <GridItem xs={12} sm={12} md={12}>
+                    <InputLabel style={{ color: "#AAAAAA" }}>Ekstra</InputLabel>
+                    <CustomInput
+                      onChange={this.handleExtraChange}
+                      labelText="Kategori hakkındaki ekstra bilgiler burada yer alacak."
+                      id="extra"
+                      formControlProps={{
+                        fullWidth: true
+                      }}
                       inputProps={{
                         multiline: true,
                         rows: 5
@@ -204,7 +207,7 @@ class EditCT extends React.Component {
                 </Grid>
               </CardBody>
               <CardFooter>
-                <Button fullWidth={true} onClick={this.editCT} color="success">Onayla</Button>
+                <Button fullWidth={true} onClick={this.addnewAT} color="success">Onayla</Button>
               </CardFooter>
             </Card>
           </GridItem>
@@ -215,8 +218,8 @@ class EditCT extends React.Component {
 
 }
 
-EditCT.propTypes = {
+NewAT.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(EditCT);
+export default withStyles(styles)(NewAT);

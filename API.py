@@ -59,7 +59,6 @@ class FetchAllArtifact(object):
         resp.set_header('X-Total-Count', count)
         resp.body = doc
 
-
 class FetchMediaObject(object):
     def on_get(self, req, resp, id):
         doc = Media.objects(id=id).to_json(indent=2)
@@ -99,6 +98,25 @@ class FetchAllMedia(object):
         resp.set_header('X-Total-Count', count)
         resp.body = doc
 
+class FetchCategoryTranslations(object):
+    def on_get(self, req, resp, id):
+        doc = CategoryTranslation.objects(category=id).to_json(indent=2)
+        resp.body = doc
+
+class FetchSingleCategoryTranslation(object):
+    def on_get(self, req, resp, id):
+        doc = CategoryTranslation.objects(id=id).to_json(indent=2)
+        resp.body = doc
+
+class FetchArtifactTranslations(object):
+    def on_get(self, req, resp, id):
+        doc = ArtifactTranslation.objects(artifact=id).to_json(indent=2)
+        resp.body = doc
+
+class FetchSingleArtifactTranslation(object):
+    def on_get(self, req, resp, id):
+        doc = ArtifactTranslation.objects(id=id).to_json(indent=2)
+        resp.body = doc
 
 singlecategory = FetchCategory()
 allcategories  = FetchAllCategories()
@@ -112,19 +130,28 @@ mediaobject    = FetchMediaObject()
 singlethumb    = FetchMediaThumb()
 allmedia       = FetchAllMedia()
 artifactmedia  = FetchArtifactMedia()
+categorytranslations      = FetchCategoryTranslations()
+singlecategorytranslation = FetchSingleCategoryTranslation()
+artifacttranslations      = FetchArtifactTranslations()
+singleartifacttranslation = FetchSingleArtifactTranslation()
 
 
 api.add_route('/categories/{id}', singlecategory)
 api.add_route('/categories', allcategories)
+api.add_route('/categorytranslations/{id}', categorytranslations)
+api.add_route('/categorytranslation/{id}', singlecategorytranslation)
 api.add_route('/languages/{id}', singlelanguage)
 api.add_route('/languages', alllanguages)
 api.add_route('/artifacts/{id}', singleartifact)
 api.add_route('/artifacts', allartifacts)
 api.add_route('/artifacts/{id}/media', artifactmedia)
+api.add_route('/artifacttranslations/{id}', artifacttranslations)
+api.add_route('/artifacttranslation/{id}', singleartifacttranslation)
 api.add_route('/media/{id}', mediaobject)
 api.add_route('/mediashow/{id}', singlemedia)
 api.add_route('/thumbshow/{id}', singlethumb)
 api.add_route('/media', allmedia)
+
 
 ################## CREATE
 
@@ -138,6 +165,25 @@ class CreateCategory(object):
 
         resp.body = "OK"
 
+
+class CreateCategoryTranslation(object):
+    def on_post(self, req, resp, id):
+        data          = json.loads(req.stream.read().decode("utf-8"))
+        category      = id
+        language      = data['language'] # lang id geliyor
+        title         = data['title']
+        description   = data['description']
+
+        lang = Language.objects(id=language)[0]
+
+        cattrans    = CategoryTranslation(language_code=lang.code,
+                                          language_title=lang.title,
+                                          title=title,
+                                          description=description,
+                                          category=category)
+        cattrans.save()
+
+        resp.body = "OK"
 
 class CreateLanguage(object):
     def on_post(self, req, resp):
@@ -205,42 +251,26 @@ class CreateArtifact(object):
 
         resp.body = "OK"
 
-
-class CreateCategoryTranslation(object):
-    def on_post(self, req, resp):
-        data        = json.loads(req.stream.read().decode("utf-8"))
-        language    = data['language']
-        title       = data['title']
-        description = data['description']
-        category    = data['category']
-
-
-        cattrans    = CategoryTranslation(language=language,
-                                          title=title,
-                                          description=description,
-                                          category=category)
-        cattrans.save()
-
-        resp.body = "OK"
-
 class CreateArtifactTranslation(object):
-    def on_post(self, req, resp):
-        data        = json.loads(req.stream.read().decode("utf-8"))
-        language    = data['language']
-        title       = data['title']
-        description = data['description']
-        extra       = data['extra']
-        artifact    = data['artifact']
+    def on_post(self, req, resp, id):
+        data          = json.loads(req.stream.read().decode("utf-8"))
+        artifact      = id
+        language      = data['language'] # lang id geliyor
+        title         = data['title']
+        description   = data['description']
+        extra         = data['extra']
 
-        arttrans    = ArtifactTranslation(language=language,
+        lang = Language.objects(id=language)[0]
+
+
+        arttrans    = ArtifactTranslation(language_code=lang.code,
+                                          language_title=lang.title,
                                           title=title,
                                           description=description,
-                                          extra=extra,
                                           artifact=artifact)
         arttrans.save()
 
         resp.body = "OK"
-
 
 createcategory = CreateCategory()
 createlanguage = CreateLanguage()
@@ -252,10 +282,10 @@ createartifacttranslation = CreateArtifactTranslation()
 
 api.add_route('/categories/create', createcategory)
 api.add_route('/languages/create', createlanguage)
-api.add_route('/categories/translation/create', createcategorytranslation)
+api.add_route('/categorytranslations/create/{id}', createcategorytranslation)
 api.add_route('/media/create', createmedia)
 api.add_route('/artifacts/create', createartifact)
-api.add_route('/artifacts/translation/create', createartifacttranslation)
+api.add_route('/artifacttranslations/create/{id}', createartifacttranslation)
 
 
 
@@ -275,6 +305,29 @@ class EditCategory(object):
             found.update(set__title=title)
             found.update(set__description=description)
 
+
+            resp.body = "OK"
+        except:
+            resp.body = "ERROR"
+
+
+class EditCategoryTranslation(object):
+    def on_post(self, req, resp):
+        data        = json.loads(req.stream.read().decode("utf-8"))
+        id          = data['id']
+        title       = data['title'] if data['title'] != "" else "Başlık yok!"
+        description = data['description']
+        language    = data['language']
+
+        try:
+            found   = CategoryTranslation.objects(id=id)
+            found.update(set__title=title)
+            found.update(set__description=description)
+
+            lang   = Language.objects(id=language)
+
+            found.update(set__language_code=lang[0].code)
+            found.update(set__language_title=lang[0].title)
 
             resp.body = "OK"
         except:
@@ -307,6 +360,7 @@ class EditArtifact(object):
         category    = data['category']
         tags        = data['tags']
         description = data['description']
+        extra       = data['extra']
 
         tags        = list(filter(lambda t: len(t)> 0, tags))
         try:
@@ -316,6 +370,7 @@ class EditArtifact(object):
             found.update(set__ibeacon_id=ibeacon_id)
             found.update(set__tags=tags)
             found.update(set__description=description)
+            found.update(set__extra=extra)
 
             cat = Category.objects(id=category)
             found.update(set__category=cat[0].id)
@@ -325,14 +380,45 @@ class EditArtifact(object):
             resp.body = "ERROR"
 
 
+class EditArtifactTranslation(object):
+    def on_post(self, req, resp):
+        data        = json.loads(req.stream.read().decode("utf-8"))
+        id          = data['id']
+        title       = data['title'] if data['title'] != "" else "Başlık yok!"
+        description = data['description']
+        extra       = data['extra']
+        language    = data['language']
+
+        try:
+            found   = ArtifactTranslation.objects(id=id)
+            found.update(set__title=title)
+            found.update(set__description=description)
+            found.update(set__extra=extra)
+
+            lang   = Language.objects(id=language)
+
+            found.update(set__language_code=lang[0].code)
+            found.update(set__language_title=lang[0].title)
+
+            resp.body = "OK"
+        except:
+            resp.body = "ERROR"
+
+
+
 editcategory    = EditCategory()
 editlanguage    = EditLanguage()
 editartifact    = EditArtifact()
+editcategoryt   = EditCategoryTranslation()
+editartifactt   = EditArtifactTranslation()
 
 
 api.add_route('/categories/edit', editcategory)
+api.add_route('/categorytranslations/edit', editcategoryt)
 api.add_route('/languages/edit', editlanguage)
 api.add_route('/artifacts/edit', editartifact)
+api.add_route('/artifacttranslations/edit', editartifactt)
+
 
 ################
 
@@ -344,6 +430,18 @@ class RemoveCategory(object):
 
         try:
             found       = Category.objects(id=id)
+            found.delete()
+            resp.body = "OK"
+        except:
+            resp.body = "ERROR"
+
+class RemoveCategoryTranslation(object):
+    def on_post(self, req, resp):
+        data        = json.loads(req.stream.read().decode("utf-8"))
+        id          = data['id']
+
+        try:
+            found       = CategoryTranslation.objects(id=id)
             found.delete()
             resp.body = "OK"
         except:
@@ -391,17 +489,31 @@ class RemoveMedia(object):
         except:
             resp.body = "NOOBJ"
 
+class RemoveArtifactTranslation(object):
+    def on_post(self, req, resp):
+        data        = json.loads(req.stream.read().decode("utf-8"))
+        id          = data['id']
 
+        try:
+            found       = ArtifactTranslation.objects(id=id)
+            found.delete()
+            resp.body = "OK"
+        except:
+            resp.body = "ERROR"
 
-removecategory = RemoveCategory()
-removelanguage = RemoveLanguage()
-removeartifact = RemoveArtifact()
-removemedia    = RemoveMedia()
+removecategory  = RemoveCategory()
+removecategoryt = RemoveCategoryTranslation()
+removelanguage  = RemoveLanguage()
+removeartifact  = RemoveArtifact()
+removemedia     = RemoveMedia()
+removeartifactt = RemoveArtifactTranslation()
 
 
 api.add_route('/categories/remove', removecategory)
+api.add_route('/categorytranslations/remove', removecategoryt)
 api.add_route('/languages/remove', removelanguage)
 api.add_route('/artifacts/remove', removeartifact)
 api.add_route('/media/remove', removemedia)
+api.add_route('/artifacttranslations/remove', removeartifactt)
 
 # EOF

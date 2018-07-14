@@ -10,7 +10,7 @@ import Table from "components/Table/Table.jsx";
 import Card from "components/Card/Card.jsx";
 import CardHeader from "components/Card/CardHeader.jsx";
 import CardBody from "components/Card/CardBody.jsx";
-import { APIfetch, NEWARTIFACTPAGE, EDITARTIFACTPAGE, EDITMEDIAPAGE, APIremoveartifact, styles } from "variables/helpers";
+import { APIfetch, NEWARTIFACTPAGE, EDITARTIFACTPAGE, ATSPAGE, EDITMEDIAPAGE, APIremoveartifact, styles } from "variables/helpers";
 import PlusOne from "@material-ui/icons/PlusOne";
 import AddAPhoto from "@material-ui/icons/AddAPhoto";
 import CardIcon from "components/Card/CardIcon.jsx";
@@ -18,6 +18,7 @@ import CardIcon from "components/Card/CardIcon.jsx";
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
 import Edit from "@material-ui/icons/Edit";
+import Translate from "@material-ui/icons/Translate";
 import Close from "@material-ui/icons/Close";
 
 class ArtifactList extends React.Component {
@@ -29,6 +30,7 @@ class ArtifactList extends React.Component {
   gotoNewArtifactPage  = (e) => { this.props.history.push(NEWARTIFACTPAGE) }
   gotoEditArtifactPage = (id) => { this.props.history.push(EDITARTIFACTPAGE + '/' + id) }
   gotoMediaPage        = (id) => { this.props.history.push(EDITMEDIAPAGE + '/' + id) }
+  artifactTranslations = (id) => { this.props.history.push(ATSPAGE + '/' + id) }
 
   removeArtifact       = (id, index) => {
     APIremoveartifact(this, id);
@@ -43,6 +45,16 @@ class ArtifactList extends React.Component {
          r.data.map((data, index) => arts.push(
            [data['id'], data['title'], data['description'].substring(0, 40)+' ...',
            <div>
+                 <Tooltip
+                     id="tooltip-top-start"
+                     title="Çeviriler"
+                     placement="right"
+                     classes={{tooltip:classes.tooltip}}>
+                     <IconButton aria-label="Sil" className={classes.tableActionButton}
+                                 onClick={this.artifactTranslations.bind(this, data['id'])}>
+                         <Translate className={classes.tableActionButtonIcon + " " + classes.close}/>
+                     </IconButton>
+                 </Tooltip>
                  <Tooltip
                      id="tooltip-top"
                      title="Düzenle"

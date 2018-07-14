@@ -26,6 +26,7 @@ class EditArtifact extends React.Component {
     qr_id: "",
     ibeacon_id: "",
     description: "",
+    extra: "",
     tags: "",
     category: "",
     categories: [],
@@ -47,6 +48,7 @@ class EditArtifact extends React.Component {
         this.setState({'tags': r.data[0].tags.join(" ")})
         this.setState({'ibeacon_id': r.data[0].ibeacon_id})
         this.setState({'description': r.data[0].description})
+        this.setState({'extra': r.data[0].extra})
         this.setState({'category': r.data[0].category})
         console.log(r.data[0].tags)
       },
@@ -63,6 +65,7 @@ class EditArtifact extends React.Component {
   handleIbeaconIDChange   = (e) => { this.setState({ ibeacon_id: e.target.value }); }
   handleCategoryChange    = (e) => { this.setState({ category: e.target.value }); }
   handleDescriptionChange = (e) => { this.setState({ description: e.target.value }); }
+  handleExtraChange       = (e) => { this.setState({ extra: e.target.value }); }
 
 
   render() {
@@ -176,6 +179,24 @@ class EditArtifact extends React.Component {
                       labelText="Eser hakkında açıklama yazısı burada yer alacak."
                       id="description"
                       value={this.state.description}
+                      formControlProps={{
+                        fullWidth: true
+                      }}
+                      inputProps={{
+                        multiline: true,
+                        rows: 5
+                      }}
+                    />
+                  </GridItem>
+                </Grid>
+                <Grid container>
+                  <GridItem xs={12} sm={12} md={12}>
+                    <InputLabel style={{ color: "#AAAAAA" }}>Ekstra</InputLabel>
+                    <CustomInput
+                      onChange={this.handleDescriptionChange}
+                      labelText="Eser hakkında ekstra bilgiler burada yer alacak."
+                      id="extra"
+                      value={this.state.extra}
                       formControlProps={{
                         fullWidth: true
                       }}

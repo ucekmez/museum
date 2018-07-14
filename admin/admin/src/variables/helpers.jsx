@@ -19,11 +19,9 @@ export const CTSPAGE              = "/categorytranslations"
 export const NEWCTPAGE            = "/newcategorytranslation";
 export const EDITCTPAGE           = "/editcategorytranslation";
 
-export const LANGS = [
-  {"code": "tr", "lang": "Türkçe"},
-  {"code": "en", "lang": "İngilizce"},
-  {"code": "de", "lang": "Almanca"}
-];
+export const ATSPAGE              = "/artifacttranslations"
+export const NEWATPAGE            = "/newartifacttranslation";
+export const EDITATPAGE           = "/editartifacttranslation";
 
 
 export const APIfetch = (url, returncallback, errorcallback) => {
@@ -165,7 +163,7 @@ export const APInewartifact = (inp) => {
              'description': inp.state.description,
              'qr_id': inp.state.qr_id,
              'ibeacon_id': inp.state.ibeacon_id,
-             'extra': "",
+             'extra': inp.state.extra,
              'tags': tags,
              'faved': [],
             },
@@ -188,7 +186,8 @@ export const APIeditartifact = (inp) => {
              'tags': tags,
              'ibeacon_id': inp.state.ibeacon_id,
              'category': inp.state.category,
-             'description': inp.state.description},
+             'description': inp.state.description,
+             'extra': inp.state.extra},
     (r) => {
       console.log("Eser düzenlendi");
       inp.props.history.push(ARTIFACTSPAGE)
@@ -216,6 +215,45 @@ export const APIremovemedia = (inp, id) => {
     (r) => {console.log(r)})
 }
 
+
+///////// artifact translations
+
+export const APInewat = (inp) => {
+  APIcreate('/artifacttranslations/create/'+inp.state.artifact,
+            {'language': inp.state.language,
+             'title': inp.state.title,
+             'description': inp.state.description,
+             'extra': inp.state.extra},
+    (r) => {
+      console.log("Çeviri eklendi");
+      inp.props.history.push(ATSPAGE + "/" + inp.state.artifact)
+    },
+    (r) => {console.log(r)})
+}
+
+export const APIeditat = (inp) => {
+  APIcreate('/artifacttranslations/edit',
+            {'id': inp.state.id, 'title': inp.state.title,
+             'description': inp.state.description,
+             'extra': inp.state.extra,
+             'language': inp.state.language},
+    (r) => {
+      console.log("Çeviri düzenlendi");
+      inp.props.history.push(ATSPAGE + "/" + inp.state.artifact)
+    },
+    (r) => {console.log(r)})
+}
+
+
+export const APIremoveat = (inp, id, ida) => {
+  APIcreate('/artifacttranslations/remove', {'id': id, },
+    (r) => {
+      console.log("Çeviri silindi");
+      //window.location.reload()
+      inp.props.history.push(ATSPAGE + "/" + ida)
+    },
+    (r) => {console.log(r)})
+}
 
 
 
