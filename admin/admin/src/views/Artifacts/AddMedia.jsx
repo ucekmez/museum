@@ -177,7 +177,7 @@ class AddMedia extends React.Component {
                 <Grid container>
                   <GridItem xs={12} sm={12} md={12}>
                       <Dropzone style={{'width': '100%', 'minHeight': '200px', }}
-                                accept="image/jpeg, image/png,  video/mp4, audio/wav"
+                                accept="image/jpeg, image/png,  video/mp4, audio/wav, audio/mp3"
                                 ref={(node) => { dropzoneRef = node; }}
                                 onDrop={(accepted, rejected) => {
                                   accepted.forEach(file => {
@@ -245,7 +245,7 @@ class AddMedia extends React.Component {
                     <FormControl fullWidth className={classes.selectFormControl}>
                       <InputLabel
                         htmlFor="simple-select" className={classes.selectLabel}>
-                        Dil Seçin
+                        Dil seçin (Türkçe)
                       </InputLabel>
                       <Select
                         MenuProps={{ className: classes.selectMenu }}
