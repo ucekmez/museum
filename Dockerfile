@@ -31,7 +31,7 @@ RUN pip install --no-cache -r requirements.txt --upgrade # python3
 
 EXPOSE 7778
 
-CMD ["/usr/local/bin/gunicorn" "-b" "0.0.0.0:7778" "--reload" "API:API"]
+CMD ["gunicorn" "-b" "0.0.0.0:7778" "--reload" "API:API"]
 
 
 
