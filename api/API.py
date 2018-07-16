@@ -56,7 +56,7 @@ class FetchAllLanguages(object):
 
 class FetchArtifact(object):
     def on_get(self, req, resp, id, lang=None):
-        doc = Artifact.objects(id=id).to_json(indent=2).encode()
+        doc = Artifact.objects(id=id).to_json(indent=2)
         doc = json.loads(doc)
         doc = doc[0]
 
