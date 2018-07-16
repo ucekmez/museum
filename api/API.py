@@ -111,6 +111,73 @@ class FetchAllArtifact(object):
         resp.set_header('X-Total-Count', count)
         resp.body = doc
 
+
+class FetchAllArtifactLang(object):
+    def on_get(self, req, resp, lang=None):
+        result = Artifact.objects()
+
+
+        if lang:
+            docs = result.to_json(indent=2)
+            docs = json.loads(docs)
+
+            for i in range(len(docs)):
+                ## add media
+                if lang:
+                    media = Media.objects(artifact=docs[i]['id'], language=lang).to_json()
+                else:
+                    media = Media.objects(artifact=docs[i]['id']).to_json()
+                media = json.loads(media)
+
+                for m in media:
+                    m['url'] = URL + '/mediashow/' + m['id']
+                    if m['mediatype'] == 'image':
+                        m['thumb_url'] = URL + '/thumbshow/' + m['id']
+
+                    try:
+                        m.pop('source', None)
+                        m.pop('thumbnail', None)
+                    except:
+                        pass
+
+                docs[i]['media'] = media
+
+                # add translation
+                if lang:
+                    trans = ArtifactTranslation.objects(artifact=docs[i]['id'], language_code=lang).to_json()
+                else:
+                    trans = ArtifactTranslation.objects(artifact=docs[i]['id']).to_json()
+                trans = json.loads(trans)
+
+                for t in trans:
+                    t.pop('artifact', None)
+
+                if lang == "tr":
+                    trans.append({"language_code": "tr",
+                                  "language_title": "Türkçe",
+                                  "title": docs[i]['title'],
+                                  "description": docs[i]['description'],
+                                  "extra": docs[i]['extra']})
+
+                docs[i]['translations'] = trans
+
+
+            count  = result.count()
+            resp.set_header('X-Total-Count', count)
+
+            resp.body = json.dumps(docs, indent=2)
+
+
+
+        else:
+            doc    = result.to_json(indent=2)
+            count  = result.count()
+            resp.set_header('X-Total-Count', count)
+            resp.body = doc
+
+
+
+
 class FetchMediaObject(object):
     def on_get(self, req, resp, id):
         doc = Media.objects(id=id).to_json(indent=2)
@@ -184,6 +251,7 @@ singlelanguage = FetchLanguage()
 alllanguages   = FetchAllLanguages()
 singleartifact = FetchArtifact()
 allartifacts   = FetchAllArtifact()
+allartifactslang   = FetchAllArtifactLang()
 allmedia       = FetchAllMedia()
 singlemedia    = FetchMedia()
 mediaobject    = FetchMediaObject()
@@ -205,6 +273,7 @@ api.add_route('/languages', alllanguages)
 api.add_route('/artifacts/{id}/{lang}', singleartifact)
 api.add_route('/artifacts/{id}', singleartifact)
 api.add_route('/artifacts', allartifacts)
+api.add_route('/artifacts/lang/{lang}', allartifactslang)
 api.add_route('/artifacts/{id}/media', artifactmedia)
 api.add_route('/artifacttranslations/{id}', artifacttranslations)
 api.add_route('/artifacttranslation/{id}', singleartifacttranslation)
