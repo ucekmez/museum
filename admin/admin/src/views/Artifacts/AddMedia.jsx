@@ -177,12 +177,13 @@ class AddMedia extends React.Component {
                 <Grid container>
                   <GridItem xs={12} sm={12} md={12}>
                       <Dropzone style={{'width': '100%', 'minHeight': '200px', }}
-                                accept="image/jpeg, image/png,  video/mp4, audio/wav, audio/mp3"
+                                accept="image/jpeg, image/png,  video/*, video/mp4, audio/wav, audio/mp3, audio/*"
                                 ref={(node) => { dropzoneRef = node; }}
                                 onDrop={(accepted, rejected) => {
                                   accepted.forEach(file => {
+                                    console.log(file);
+
                                     this.setState({'thumbnail': file.preview})
-                                    //console.log(file)
                                     const _this = this;
                                     const reader = new FileReader();
                                     reader.onload = function(event) {
@@ -235,7 +236,7 @@ class AddMedia extends React.Component {
                             root: classes.selectMenuItem,
                             selected: classes.selectMenuItemSelected
                           }}
-                          value="voice">
+                          value="audio">
                           Ses
                         </MenuItem>
 
@@ -288,7 +289,7 @@ class AddMedia extends React.Component {
                 </Grid>
               </CardBody>
               <CardFooter>
-                <Button disabled={(this.state.yukledisabled)? "disabled" : ""} id="yukle_button" fullWidth={true} onClick={this.addMedia} color="success">{this.state.yuklebutton}</Button>
+                <Button disabled={(this.state.yukledisabled)? "" : ""} id="yukle_button" fullWidth={true} onClick={this.addMedia} color="success">{this.state.yuklebutton}</Button>
               </CardFooter>
             </Card>
           </GridItem>

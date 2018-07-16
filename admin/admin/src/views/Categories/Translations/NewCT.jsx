@@ -17,7 +17,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 
 import CardBody from "components/Card/CardBody.jsx";
 import CardFooter from "components/Card/CardFooter.jsx";
-import { APInewct, APIfetch, styles, CATEGORIESPAGE } from "variables/helpers";
+import { APInewct, APIfetch, styles } from "variables/helpers";
 
 
 class NewCT extends React.Component {

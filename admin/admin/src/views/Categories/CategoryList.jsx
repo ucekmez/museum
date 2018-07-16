@@ -10,7 +10,7 @@ import Table from "components/Table/Table.jsx";
 import Card from "components/Card/Card.jsx";
 import CardHeader from "components/Card/CardHeader.jsx";
 import CardBody from "components/Card/CardBody.jsx";
-import { APIfetch, NEWCATEGORYPAGE, EDITCATEGORYPAGE, CTSPAGE, NEWCTPAGE, APIremovecategory, styles } from "variables/helpers";
+import { APIfetch, NEWCATEGORYPAGE, EDITCATEGORYPAGE, CTSPAGE, APIremovecategory, styles } from "variables/helpers";
 import PlusOne from "@material-ui/icons/PlusOne";
 import CardIcon from "components/Card/CardIcon.jsx";
 

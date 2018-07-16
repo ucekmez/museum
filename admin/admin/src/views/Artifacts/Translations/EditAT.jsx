@@ -61,7 +61,7 @@ class EditAT extends React.Component {
                       this.setState({'languages': this.state.languages.filter((l, i) => l.code !== at.language_code)})
                     }else {
                       this.state.languages.map((l, i) => {
-                        if (l.code == this.state.language_code) {
+                        if (l.code === this.state.language_code) {
                           this.setState({ language: l.id})
                         }
                       })

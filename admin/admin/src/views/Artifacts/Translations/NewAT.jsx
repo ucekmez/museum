@@ -17,7 +17,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 
 import CardBody from "components/Card/CardBody.jsx";
 import CardFooter from "components/Card/CardFooter.jsx";
-import { APInewat, APIfetch, styles, ARTIFACTSPAGE } from "variables/helpers";
+import { APInewat, APIfetch, styles } from "variables/helpers";
 
 
 class NewAT extends React.Component {

@@ -9,6 +9,10 @@ import base64
 from PIL import Image
 import numpy as np
 import io
+import json
+import requests
+
+URL = "51.15.130.186:7778"
 
 cors = CORS(allow_all_origins=True,
             allow_all_headers=True,
@@ -33,6 +37,7 @@ class FetchAllCategories(object):
         doc    = result.to_json(indent=2)
         count  = result.count()
         resp.set_header('X-Total-Count', count)
+
         resp.body = doc
 
 class FetchLanguage(object):
@@ -50,9 +55,53 @@ class FetchAllLanguages(object):
 
 
 class FetchArtifact(object):
-    def on_get(self, req, resp, id):
-        doc = Artifact.objects(id=id).to_json(indent=2)
-        resp.body = doc
+    def on_get(self, req, resp, id, lang=None):
+        doc = Artifact.objects(id=id).to_json(indent=2).encode()
+        doc = json.loads(doc)
+        doc = doc[0]
+
+        ## add media
+        if lang:
+            media = Media.objects(artifact=doc['id'], language=lang).to_json()
+        else:
+            media = Media.objects(artifact=doc['id']).to_json()
+        media = json.loads(media)
+
+        for m in media:
+            m['url'] = URL + '/mediashow/' + m['id']
+            if m['mediatype'] == 'image':
+                m['thumb_url'] = URL + '/thumbshow/' + m['id']
+
+            try:
+                m.pop('source', None)
+                m.pop('thumbnail', None)
+            except:
+                pass
+
+        doc['media'] = media
+
+        # add translation
+        if lang:
+            trans = ArtifactTranslation.objects(artifact=id, language_code=lang).to_json()
+        else:
+            trans = ArtifactTranslation.objects(artifact=id).to_json()
+        trans = json.loads(trans)
+
+        for t in trans:
+            t.pop('artifact', None)
+
+        if lang == "tr":
+            trans.append({"language_code": "tr",
+                          "language_title": "Türkçe",
+                          "title": doc['title'],
+                          "description": doc['description'],
+                          "extra": doc['extra']})
+
+        doc['translations'] = trans
+
+
+
+        resp.body = json.dumps([doc], indent=2)
 
 class FetchAllArtifact(object):
     def on_get(self, req, resp):
@@ -70,10 +119,18 @@ class FetchMediaObject(object):
 class FetchMedia(object):
     def on_get(self, req, resp, id):
         doc = Media.objects(id=id)[0]
-        img = base64.decodestring(doc.source.read())
+        med = base64.decodestring(doc.source.read())
 
-        resp.content_type = 'image/png'
-        resp.body = img
+        if doc.mediatype == "image":
+            resp.content_type = 'image/png'
+
+        elif doc.mediatype == "video":
+            resp.content_type = 'video/mp4'
+
+        elif doc.mediatype == "audio":
+            resp.content_type = 'audio/mp3'
+
+        resp.body = med
 
 class FetchMediaThumb(object):
     def on_get(self, req, resp, id):
@@ -145,6 +202,7 @@ api.add_route('/categorytranslations/{id}', categorytranslations)
 api.add_route('/categorytranslation/{id}', singlecategorytranslation)
 api.add_route('/languages/{id}', singlelanguage)
 api.add_route('/languages', alllanguages)
+api.add_route('/artifacts/{id}/{lang}', singleartifact)
 api.add_route('/artifacts/{id}', singleartifact)
 api.add_route('/artifacts', allartifacts)
 api.add_route('/artifacts/{id}/media', artifactmedia)
@@ -174,8 +232,8 @@ class CreateCategoryTranslation(object):
         data          = json.loads(req.stream.read().decode("utf-8"))
         category      = id
         language      = data['language'] # lang id geliyor
-        title         = data['title']
-        description   = data['description']
+        title         = data['title'] if title in data else ""
+        description   = data['description'] if 'description' in data else ""
 
         lang = Language.objects(id=language)[0]
 
@@ -203,27 +261,59 @@ class CreateMedia(object):
     def on_post(self, req, resp):
         data        = json.loads(req.stream.read().decode("utf-8"))['data']
 
+
+
         mediatype   = data['mediatype'] or "image"
         language    = data['language'] or "tr"
         artifact    = data['artifact']
-        description = data['description']
+        description = data['description'] if 'description' in data else ""
         media       = data['media'].split(",")[1] if data['media'] else ""
         header      = data['media'].split(",")[0] + "," if data['media'] else ""
 
         med = Media(language=language, mediatype=mediatype, description=description, artifact=artifact, header=header)
         #rawdata     = base64.decodestring(media.encode())
-        med.source.put(media.encode())
-        med.save()
 
-
-        with open("/tmp/{}.png".format(med.id), "wb") as f:
-            f.write(base64.decodebytes(med.source.read()))
-        tmp_img   = Image.open("/tmp/{}.png".format(med.id))
-        tmp_img.thumbnail((256, 256))
-        tmp_img.save("/tmp/{}_thumb.png".format(med.id))
-        with open("/tmp/{}_thumb.png".format(med.id), "rb") as f:
-            med.thumbnail.put(f, content_type='image/png')
+        if med.mediatype == "video":
+            med.source.put(media.encode())
             med.save()
+
+            thumbimage = requests.get("https://image.freepik.com/free-icon/video-camera_318-50337.jpg").content
+            with open("/tmp/tmp.png", "wb") as f:
+                f.write(thumbimage)
+            with open("/tmp/tmp.png", "rb") as f:
+                med.thumbnail.put(f, content_type='image/png')
+                med.save()
+
+            print("video saved")
+
+        if med.mediatype == "audio":
+            med.source.put(media.encode())
+            med.save()
+
+            with open("/tmp/{}.mp3".format(med.id), "wb") as f:
+                f.write(base64.decodebytes(med.source.read()))
+
+            thumbimage = requests.get("https://png.icons8.com/metro/1600/high-volume.png").content
+            with open("/tmp/tmpaudio.png", "wb") as f:
+                f.write(thumbimage)
+            with open("/tmp/tmpaudio.png", "rb") as f:
+                med.thumbnail.put(f, content_type='image/png')
+                med.save()
+
+
+        if med.mediatype == "image":
+            med.source.put(media.encode())
+            med.save()
+
+            with open("/tmp/{}.png".format(med.id), "wb") as f:
+                f.write(base64.decodebytes(med.source.read()))
+            tmp_img   = Image.open("/tmp/{}.png".format(med.id))
+            tmp_img.thumbnail((256, 256))
+            tmp_img.save("/tmp/{}_thumb.png".format(med.id))
+            with open("/tmp/{}_thumb.png".format(med.id), "rb") as f:
+                med.thumbnail.put(f, content_type='image/png')
+                med.save()
+
 
 
         resp.body = med.to_json()
@@ -259,9 +349,9 @@ class CreateArtifactTranslation(object):
         data          = json.loads(req.stream.read().decode("utf-8"))
         artifact      = id
         language      = data['language'] # lang id geliyor
-        title         = data['title']
-        description   = data['description']
-        extra         = data['extra']
+        title         = data['title'] if 'title' in data else ""
+        description   = data['description'] if 'description' in data else ""
+        extra         = data['extra'] if 'extra' in data else ""
 
         lang = Language.objects(id=language)[0]
 
@@ -270,7 +360,8 @@ class CreateArtifactTranslation(object):
                                           language_title=lang.title,
                                           title=title,
                                           description=description,
-                                          artifact=artifact)
+                                          artifact=artifact,
+                                          extra=extra)
         arttrans.save()
 
         resp.body = "OK"
