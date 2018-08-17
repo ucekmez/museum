@@ -113,7 +113,7 @@ class EditAT extends React.Component {
               </CardHeader>
               <CardBody>
                 <Grid container>
-                  <div><h3>{ this.state.base_title }</h3></div>
+                  { this.state.base_title }
                 </Grid>
               </CardBody>
             </Card>
@@ -123,7 +123,17 @@ class EditAT extends React.Component {
               </CardHeader>
               <CardBody>
                 <Grid container>
-                  <div><p>{ this.state.base_description }</p></div>
+                  { this.state.base_description }
+                </Grid>
+              </CardBody>
+            </Card>
+            <Card>
+              <CardHeader color="warning">
+                <h4 className={classes.cardTitleWhite} style={{'color':'black'}}>Ekstra</h4>
+              </CardHeader>
+              <CardBody>
+                <Grid container>
+                  { this.state.base_extra }
                 </Grid>
               </CardBody>
             </Card>

@@ -9,6 +9,8 @@ import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import Input from "@material-ui/core/Input";
+import Check from "@material-ui/icons/Check";
+import Clear from "@material-ui/icons/Clear";
 
 import customInputStyle from "assets/jss/material-dashboard-pro-react/components/customInputStyle.jsx";
 
@@ -24,7 +26,9 @@ function CustomInput({ ...props }) {
     white,
     inputRootCustomClasses,
     success,
-    helpText
+    helpText,
+    onChange,
+    value,
   } = props;
 
   const labelClasses = classNames({
@@ -76,6 +80,8 @@ function CustomInput({ ...props }) {
           underline: underlineClasses
         }}
         id={id}
+        onChange={onChange}
+        value={value}
         {...inputProps}
       />
       {helpText !== undefined ? (
