@@ -98,10 +98,163 @@ class FetchArtifact(object):
                           "extra": doc['extra']})
 
         doc['translations'] = trans
-
-
-
         resp.body = json.dumps([doc], indent=2)
+
+
+############ search functions
+
+class SearchByID(object):
+    def on_get(self, req, resp, id, lang=None):
+        try:
+            doc = Artifact.objects(id=id).to_json(indent=2)
+            doc = json.loads(doc)
+            doc = doc[0]
+
+            ## add media
+            if lang:
+                media = Media.objects(artifact=doc['id'], language=lang).to_json()
+            else:
+                media = Media.objects(artifact=doc['id']).to_json()
+            media = json.loads(media)
+
+            for m in media:
+                m['url'] = URL + '/mediashow/' + m['id']
+                if m['mediatype'] == 'image':
+                    m['thumb_url'] = URL + '/thumbshow/' + m['id']
+
+                try:
+                    m.pop('source', None)
+                    m.pop('thumbnail', None)
+                except:
+                    pass
+
+            doc['media'] = media
+
+            # add translation
+            if lang:
+                trans = ArtifactTranslation.objects(artifact=doc['id'], language_code=lang).to_json()
+            else:
+                trans = ArtifactTranslation.objects(artifact=doc['id']).to_json()
+            trans = json.loads(trans)
+
+            for t in trans:
+                t.pop('artifact', None)
+
+            if lang == "tr":
+                trans.append({"language_code": "tr",
+                              "language_title": "Türkçe",
+                              "title": doc['title'],
+                              "description": doc['description'],
+                              "extra": doc['extra']})
+
+            doc['translations'] = trans
+            resp.body = json.dumps(doc, indent=2)
+
+        except:
+            resp.body = "NOTFOUND"
+
+
+class SearchByQR(object):
+    def on_get(self, req, resp, qr, lang=None):
+        doc = Artifact.objects(qr_id=qr).to_json(indent=2)
+        doc = json.loads(doc)
+
+        try:
+            doc = doc[0]
+
+            ## add media
+            if lang:
+                media = Media.objects(artifact=doc['id'], language=lang).to_json()
+            else:
+                media = Media.objects(artifact=doc['id']).to_json()
+            media = json.loads(media)
+
+            for m in media:
+                m['url'] = URL + '/mediashow/' + m['id']
+                if m['mediatype'] == 'image':
+                    m['thumb_url'] = URL + '/thumbshow/' + m['id']
+
+                try:
+                    m.pop('source', None)
+                    m.pop('thumbnail', None)
+                except:
+                    pass
+
+            doc['media'] = media
+
+            # add translation
+            if lang:
+                trans = ArtifactTranslation.objects(artifact=doc['id'], language_code=lang).to_json()
+            else:
+                trans = ArtifactTranslation.objects(artifact=doc['id']).to_json()
+            trans = json.loads(trans)
+
+            for t in trans:
+                t.pop('artifact', None)
+
+            if lang == "tr":
+                trans.append({"language_code": "tr",
+                              "language_title": "Türkçe",
+                              "title": doc['title'],
+                              "description": doc['description'],
+                              "extra": doc['extra']})
+
+            doc['translations'] = trans
+            resp.body = json.dumps(doc, indent=2)
+        except:
+            resp.body = "NOTFOUND"
+
+class SearchByIB(object):
+    def on_get(self, req, resp, ib, lang=None):
+        doc = Artifact.objects(ibeacon_id=ib).to_json(indent=2)
+        doc = json.loads(doc)
+
+        try:
+            doc = doc[0]
+
+            ## add media
+            if lang:
+                media = Media.objects(artifact=doc['id'], language=lang).to_json()
+            else:
+                media = Media.objects(artifact=doc['id']).to_json()
+            media = json.loads(media)
+
+            for m in media:
+                m['url'] = URL + '/mediashow/' + m['id']
+                if m['mediatype'] == 'image':
+                    m['thumb_url'] = URL + '/thumbshow/' + m['id']
+
+                try:
+                    m.pop('source', None)
+                    m.pop('thumbnail', None)
+                except:
+                    pass
+
+            doc['media'] = media
+
+            # add translation
+            if lang:
+                trans = ArtifactTranslation.objects(artifact=doc['id'], language_code=lang).to_json()
+            else:
+                trans = ArtifactTranslation.objects(artifact=doc['id']).to_json()
+            trans = json.loads(trans)
+
+            for t in trans:
+                t.pop('artifact', None)
+
+            if lang == "tr":
+                trans.append({"language_code": "tr",
+                              "language_title": "Türkçe",
+                              "title": doc['title'],
+                              "description": doc['description'],
+                              "extra": doc['extra']})
+
+            doc['translations'] = trans
+            resp.body = json.dumps(doc, indent=2)
+        except:
+            resp.body = "NOTFOUND"
+
+############ /search functions
 
 class FetchAllArtifact(object):
     def on_get(self, req, resp):
@@ -112,62 +265,65 @@ class FetchAllArtifact(object):
         resp.body = doc
 
 
+def doFetchArtifacts(result, lang):
+
+    docs = result.to_json(indent=2)
+    docs = json.loads(docs)
+
+    for i in range(len(docs)):
+        ## add media
+        if lang:
+            media = Media.objects(artifact=docs[i]['id'], language=lang).to_json()
+        else:
+            media = Media.objects(artifact=docs[i]['id']).to_json()
+        media = json.loads(media)
+
+        for m in media:
+            m['url'] = URL + '/mediashow/' + m['id']
+            if m['mediatype'] == 'image':
+                m['thumb_url'] = URL + '/thumbshow/' + m['id']
+
+            try:
+                m.pop('source', None)
+                m.pop('thumbnail', None)
+                m.pop('header', None)
+                m.pop('artifact', None)
+                m.pop('description', None)
+            except:
+                pass
+
+        docs[i]['media'] = media
+
+        # add translation
+        if lang:
+            trans = ArtifactTranslation.objects(artifact=docs[i]['id'], language_code=lang).to_json()
+        else:
+            trans = ArtifactTranslation.objects(artifact=docs[i]['id']).to_json()
+        trans = json.loads(trans)
+
+        if lang == "tr":
+            trans.append({"language_code": "tr",
+                          "language_title": "Türkçe",
+                          "title": docs[i]['title'],
+                          "description": docs[i]['description'],
+                          "extra": docs[i]['extra']})
+
+        for t in trans:
+            t.pop('artifact', None)
+            t.pop('language_title', None)
+            t.pop('description', None)
+            t.pop('extra', None)
+
+        docs[i]['translations'] = trans
+
+    return docs
+
 class FetchAllArtifactLang(object):
     def on_get(self, req, resp, lang=None):
         result = Artifact.objects()
 
-
         if lang:
-            docs = result.to_json(indent=2)
-            docs = json.loads(docs)
-
-            for i in range(len(docs)):
-                ## add media
-                if lang:
-                    media = Media.objects(artifact=docs[i]['id'], language=lang).to_json()
-                else:
-                    media = Media.objects(artifact=docs[i]['id']).to_json()
-                media = json.loads(media)
-
-                for m in media:
-                    m['url'] = URL + '/mediashow/' + m['id']
-                    if m['mediatype'] == 'image':
-                        m['thumb_url'] = URL + '/thumbshow/' + m['id']
-
-                    try:
-                        m.pop('source', None)
-                        m.pop('thumbnail', None)
-                    except:
-                        pass
-
-                docs[i]['media'] = media
-
-                # add translation
-                if lang:
-                    trans = ArtifactTranslation.objects(artifact=docs[i]['id'], language_code=lang).to_json()
-                else:
-                    trans = ArtifactTranslation.objects(artifact=docs[i]['id']).to_json()
-                trans = json.loads(trans)
-
-                for t in trans:
-                    t.pop('artifact', None)
-
-                if lang == "tr":
-                    trans.append({"language_code": "tr",
-                                  "language_title": "Türkçe",
-                                  "title": docs[i]['title'],
-                                  "description": docs[i]['description'],
-                                  "extra": docs[i]['extra']})
-
-                docs[i]['translations'] = trans
-
-
-            count  = result.count()
-            resp.set_header('X-Total-Count', count)
-
-            resp.body = json.dumps(docs, indent=2)
-
-
+            resp.body = json.dumps(doFetchArtifacts(result, lang), indent=2)
 
         else:
             doc    = result.to_json(indent=2)
@@ -245,6 +401,11 @@ class FetchSingleArtifactTranslation(object):
         doc = ArtifactTranslation.objects(id=id).to_json(indent=2)
         resp.body = doc
 
+
+#class SearchByQRCode(object):
+#    def on_get(self, req, resp, qrcode):
+
+
 singlecategory = FetchCategory()
 allcategories  = FetchAllCategories()
 singlelanguage = FetchLanguage()
@@ -281,6 +442,10 @@ api.add_route('/media/{id}', mediaobject)
 api.add_route('/mediashow/{id}', singlemedia)
 api.add_route('/thumbshow/{id}', singlethumb)
 api.add_route('/media', allmedia)
+
+api.add_route('/artifacts/search/id/{id}', SearchByID())
+api.add_route('/artifacts/search/qr/{qr}', SearchByQR())
+api.add_route('/artifacts/search/ibeacon/{ib}', SearchByIB())
 
 
 ################## CREATE
