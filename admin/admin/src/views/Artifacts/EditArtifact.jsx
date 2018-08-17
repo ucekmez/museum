@@ -18,6 +18,8 @@ import CardBody from "components/Card/CardBody.jsx";
 import CardFooter from "components/Card/CardFooter.jsx";
 import { APIeditartifact, APIfetch, ARTIFACTSPAGE, styles } from "variables/helpers";
 
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Switch from "@material-ui/core/Switch";
 
 class EditArtifact extends React.Component {
   state = {
@@ -30,6 +32,7 @@ class EditArtifact extends React.Component {
     tags: "",
     category: "",
     categories: [],
+    isfeatured: false,
   };
 
   componentDidMount(prevProps) {
@@ -42,6 +45,7 @@ class EditArtifact extends React.Component {
     const fetched_id = this.props.match.params.id
     APIfetch('/artifacts/' + fetched_id,
       (r) => {
+        console.log(r.data[0])
         this.setState({'id': fetched_id})
         this.setState({'title': r.data[0].title})
         this.setState({'qr_id': r.data[0].qr_id})
@@ -50,7 +54,7 @@ class EditArtifact extends React.Component {
         this.setState({'description': r.data[0].description})
         this.setState({'extra': r.data[0].extra})
         this.setState({'category': r.data[0].category})
-        console.log(r.data[0].tags)
+        this.setState({'isfeatured': r.data[0].isfeatured})
       },
       (r) => {
         this.props.history.push(ARTIFACTSPAGE)
@@ -66,6 +70,7 @@ class EditArtifact extends React.Component {
   handleCategoryChange    = (e) => { this.setState({ category: e.target.value }); }
   handleDescriptionChange = (e) => { this.setState({ description: e.target.value }); }
   handleExtraChange       = (e) => { this.setState({ extra: e.target.value }); }
+  handleFeaturedChange    = name => event => { this.setState({ [name]: event.target.checked }); };
 
 
   render() {
@@ -158,6 +163,35 @@ class EditArtifact extends React.Component {
                     />
                   </GridItem>
                 </Grid>
+
+                <Grid>
+                  <GridItem xs={12} sm={12} md={9}>
+                    <div className={classes.block}>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            name="checkisfeatured"
+                            value=""
+                            checked={this.state.isfeatured}
+                            onChange={this.handleFeaturedChange("isfeatured")}
+                            classes={{
+                              switchBase: classes.switchBase,
+                              checked: classes.switchChecked,
+                              icon: classes.switchIcon,
+                              iconChecked: classes.switchIconChecked,
+                              bar: classes.switchBar
+                            }}
+                          />
+                        }
+                        classes={{
+                          label: classes.label
+                        }}
+                        label="Ana Sayfada Göster"
+                      />
+                    </div>
+                  </GridItem>
+                </Grid>
+
                 <Grid container>
                   <GridItem xs={12} sm={12} md={12}>
                     <CustomInput

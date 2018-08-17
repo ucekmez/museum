@@ -560,6 +560,7 @@ class CreateArtifact(object):
         category    = data['category'] # references to category
         tags        = data['tags']        if 'tags' in data else ""
         faved       = data['faved']       if 'faved' in data else ""
+        isfeatured  = data['isfeatured']  if 'isfeatured' in data else False
 
         title       = data['title']       if 'title' in data and data['title'] != "" else "Başlık yok!"
         description = data['description'] if 'description' in data else ""
@@ -573,6 +574,7 @@ class CreateArtifact(object):
                        category=category,
                        description=description,
                        tags=tags,
+                       isfeatured=isfeatured,
                        extra=extra)
         art.save()
 
@@ -687,6 +689,7 @@ class EditArtifact(object):
         ibeacon_id  = data['ibeacon_id']
         category    = data['category']
         tags        = data['tags']
+        isfeatured  = data['isfeatured']
         description = data['description']
         extra       = data['extra']
 
@@ -699,6 +702,7 @@ class EditArtifact(object):
             found.update(set__tags=tags)
             found.update(set__description=description)
             found.update(set__extra=extra)
+            found.update(set__isfeatured=isfeatured)
 
             cat = Category.objects(id=category)
             found.update(set__category=cat[0].id)

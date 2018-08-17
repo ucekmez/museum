@@ -19,6 +19,11 @@ import CardBody from "components/Card/CardBody.jsx";
 import CardFooter from "components/Card/CardFooter.jsx";
 import { APInewartifact, styles, APIfetch } from "variables/helpers";
 
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Switch from "@material-ui/core/Switch";
+
+
+
 class NewArtifact extends React.Component {
   state = {
     title: "",
@@ -28,7 +33,8 @@ class NewArtifact extends React.Component {
     description: "",
     extra: "",
     tags: "",
-    categories: []
+    categories: [],
+    isfeatured: false,
   };
 
   componentDidMount(prevProps) {
@@ -39,7 +45,7 @@ class NewArtifact extends React.Component {
       (r) => { console.log(r)} )
   }
 
-  addnewArtifact = () => { APInewartifact(this) }
+  addnewArtifact = () => { APInewartifact(this); }
 
   handleTitleChange       = (e) => { this.setState({ title: e.target.value }); }
   handleQRIDChange        = (e) => { this.setState({ qr_id: e.target.value }); }
@@ -48,6 +54,8 @@ class NewArtifact extends React.Component {
   handleCategoryChange    = (e) => { this.setState({ category: e.target.value }); }
   handleDescriptionChange = (e) => { this.setState({ description: e.target.value }); }
   handleExtraChange       = (e) => { this.setState({ extra: e.target.value }); }
+  handleFeaturedChange    = (e) => { this.setState({ isfeatured: e.target.checked }); };
+
 
 
   render() {
@@ -147,6 +155,35 @@ class NewArtifact extends React.Component {
                     />
                   </GridItem>
                 </Grid>
+
+                <Grid>
+                  <GridItem xs={12} sm={12} md={9}>
+                    <div className={classes.block}>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            name="checkisfeatured"
+                            value=""
+                            checked={this.state.isfeatured}
+                            onChange={this.handleFeaturedChange}
+                            classes={{
+                              switchBase: classes.switchBase,
+                              checked: classes.switchChecked,
+                              icon: classes.switchIcon,
+                              iconChecked: classes.switchIconChecked,
+                              bar: classes.switchBar
+                            }}
+                          />
+                        }
+                        classes={{
+                          label: classes.label
+                        }}
+                        label="Ana Sayfada Göster"
+                      />
+                    </div>
+                  </GridItem>
+                </Grid>
+
                 <Grid container>
                   <GridItem xs={12} sm={12} md={12}>
                     <InputLabel style={{ color: "#AAAAAA" }}>Açıklama</InputLabel>

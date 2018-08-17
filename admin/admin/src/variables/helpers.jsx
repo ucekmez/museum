@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-//export const APIURL               = "http://localhost:8000";
-export const APIURL               = "http://51.15.130.186:7778";
+export const APIURL               = "http://localhost:7778";
+//export const APIURL               = "http://51.15.130.186:7778";
 
 export const CATEGORIESPAGE       = "/categories";
 export const ARTIFACTSPAGE        = "/artifacts";
@@ -157,16 +157,19 @@ export const APInewartifact = (inp) => {
   if (inp.state.tags.length > 0) {
     tags = inp.state.tags.split(" ");
   }
+
+  const query = {'title': inp.state.title,
+     'category': inp.state.category,
+     'description': inp.state.description,
+     'qr_id': inp.state.qr_id,
+     'ibeacon_id': inp.state.ibeacon_id,
+     'extra': inp.state.extra,
+     'tags': tags,
+     'faved': [],
+     'isfeatured': inp.state.isfeatured
+    }
   APIcreate('/artifacts/create',
-            {'title': inp.state.title,
-             'category': inp.state.category,
-             'description': inp.state.description,
-             'qr_id': inp.state.qr_id,
-             'ibeacon_id': inp.state.ibeacon_id,
-             'extra': inp.state.extra,
-             'tags': tags,
-             'faved': [],
-            },
+            query,
     (r) => {
       console.log("Eser eklendi");
       inp.props.history.push(ARTIFACTSPAGE)
@@ -187,7 +190,9 @@ export const APIeditartifact = (inp) => {
              'ibeacon_id': inp.state.ibeacon_id,
              'category': inp.state.category,
              'description': inp.state.description,
-             'extra': inp.state.extra},
+             'extra': inp.state.extra,
+             'isfeatured': inp.state.isfeatured
+           },
     (r) => {
       console.log("Eser düzenlendi");
       inp.props.history.push(ARTIFACTSPAGE)

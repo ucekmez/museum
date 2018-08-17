@@ -36,6 +36,7 @@ class Artifact(gj.Document):
     ibeacon_id  = StringField(max_length=32)
     category    = ReferenceField(Category, reverse_delete_rule=CASCADE) # keeps category id
     description = StringField()
+    isfeatured  = BooleanField(default=False)
     tags        = ListField(StringField(max_length=32))
     extra       = StringField()
     created_at  = DateTimeField(default=datetime.datetime.utcnow)
