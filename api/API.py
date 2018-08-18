@@ -26,6 +26,20 @@ api = application = falcon.API(middleware=[MultipartMiddleware(), cors.middlewar
 
 ################## READ
 
+class FetchPage(object):
+    def on_get(self, req, resp, id):
+        doc = Page.objects(id=id).to_json(indent=2)
+        resp.body = doc
+
+class FetchAllPages(object):
+    def on_get(self, req, resp):
+        result = Page.objects()
+        doc    = result.to_json(indent=2)
+        count  = result.count()
+        resp.set_header('X-Total-Count', count)
+
+        resp.body = doc
+
 class FetchCategory(object):
     def on_get(self, req, resp, id):
         doc = Category.objects(id=id).to_json(indent=2)
@@ -386,6 +400,16 @@ class FetchCategoryTranslations(object):
         doc = CategoryTranslation.objects(category=id).to_json(indent=2)
         resp.body = doc
 
+class FetchSinglePageTranslation(object):
+    def on_get(self, req, resp, id):
+        doc = PageTranslation.objects(id=id).to_json(indent=2)
+        resp.body = doc
+
+class FetchPageTranslations(object):
+    def on_get(self, req, resp, id):
+        doc = PageTranslation.objects(page=id).to_json(indent=2)
+        resp.body = doc
+
 class FetchSingleCategoryTranslation(object):
     def on_get(self, req, resp, id):
         doc = CategoryTranslation.objects(id=id).to_json(indent=2)
@@ -406,6 +430,9 @@ class FetchSingleArtifactTranslation(object):
 #    def on_get(self, req, resp, qrcode):
 
 
+
+singlepage     = FetchPage()
+allpages       = FetchAllPages()
 singlecategory = FetchCategory()
 allcategories  = FetchAllCategories()
 singlelanguage = FetchLanguage()
@@ -420,15 +447,21 @@ singlethumb    = FetchMediaThumb()
 allmedia       = FetchAllMedia()
 artifactmedia  = FetchArtifactMedia()
 categorytranslations      = FetchCategoryTranslations()
+pagetranslations          = FetchPageTranslations()
 singlecategorytranslation = FetchSingleCategoryTranslation()
+singlepagetranslation     = FetchSinglePageTranslation()
 artifacttranslations      = FetchArtifactTranslations()
 singleartifacttranslation = FetchSingleArtifactTranslation()
 
 
+api.add_route('/pages/{id}', singlepage)
+api.add_route('/pages', allpages)
 api.add_route('/categories/{id}', singlecategory)
 api.add_route('/categories', allcategories)
 api.add_route('/categorytranslations/{id}', categorytranslations)
 api.add_route('/categorytranslation/{id}', singlecategorytranslation)
+api.add_route('/pagetranslations/{id}', pagetranslations)
+api.add_route('/pagetranslation/{id}', singlepagetranslation)
 api.add_route('/languages/{id}', singlelanguage)
 api.add_route('/languages', alllanguages)
 api.add_route('/artifacts/{id}/{lang}', singleartifact)
@@ -450,6 +483,39 @@ api.add_route('/artifacts/search/ibeacon/{ib}', SearchByIB())
 
 ################## CREATE
 
+
+class CreatePage(object):
+    def on_post(self, req, resp):
+        data        = json.loads(req.stream.read().decode("utf-8"))
+        title       = data['title']       if 'title' in data and data['title'] != "" else "Başlık yok!"
+        content     = data['content']     if 'content' in data else ""
+        page        = Page(title=title, content=content)
+        page.save()
+
+        resp.body = "OK"
+
+
+class CreatePageTranslation(object):
+    def on_post(self, req, resp, id):
+        data          = json.loads(req.stream.read().decode("utf-8"))
+        page          = id
+        language      = data['language'] # lang id geliyor
+        title         = data['title'] if 'title' in data else ""
+        content       = data['content'] if 'content' in data else ""
+
+        lang = Language.objects(id=language)[0]
+
+        pagetrans     = PageTranslation(language_code=lang.code,
+                                        language_title=lang.title,
+                                        title=title,
+                                        content=content,
+                                        page=page)
+        pagetrans.save()
+
+        resp.body = "OK"
+
+
+
 class CreateCategory(object):
     def on_post(self, req, resp):
         data        = json.loads(req.stream.read().decode("utf-8"))
@@ -466,7 +532,7 @@ class CreateCategoryTranslation(object):
         data          = json.loads(req.stream.read().decode("utf-8"))
         category      = id
         language      = data['language'] # lang id geliyor
-        title         = data['title'] if title in data else ""
+        title         = data['title'] if 'title' in data else ""
         description   = data['description'] if 'description' in data else ""
 
         lang = Language.objects(id=language)[0]
@@ -602,14 +668,19 @@ class CreateArtifactTranslation(object):
 
         resp.body = "OK"
 
+
+createpage = CreatePage()
 createcategory = CreateCategory()
 createlanguage = CreateLanguage()
 createmedia    = CreateMedia()
 createartifact = CreateArtifact()
+createpagetranslation = CreatePageTranslation()
 createcategorytranslation = CreateCategoryTranslation()
 createartifacttranslation = CreateArtifactTranslation()
 
 
+api.add_route('/pages/create', createpage)
+api.add_route('/pagetranslations/create/{id}', createpagetranslation)
 api.add_route('/categories/create', createcategory)
 api.add_route('/languages/create', createlanguage)
 api.add_route('/categorytranslations/create/{id}', createcategorytranslation)
@@ -621,6 +692,47 @@ api.add_route('/artifacttranslations/create/{id}', createartifacttranslation)
 
 
 ################
+
+
+class EditPage(object):
+    def on_post(self, req, resp):
+        data        = json.loads(req.stream.read().decode("utf-8"))
+        id          = data['id']
+        title       = data['title'] if data['title'] != "" else "Başlık yok!"
+        content     = data['content']
+
+        try:
+            found             = Page.objects(id=id)
+            found.update(set__title=title)
+            found.update(set__content=content)
+
+
+            resp.body = "OK"
+        except:
+            resp.body = "ERROR"
+
+
+class EditPageTranslation(object):
+    def on_post(self, req, resp):
+        data        = json.loads(req.stream.read().decode("utf-8"))
+        id          = data['id']
+        title       = data['title'] if data['title'] != "" else "Başlık yok!"
+        content     = data['content']
+        language    = data['language']
+
+        try:
+            found   = PageTranslation.objects(id=id)
+            found.update(set__title=title)
+            found.update(set__content=content)
+
+            lang   = Language.objects(id=language)
+
+            found.update(set__language_code=lang[0].code)
+            found.update(set__language_title=lang[0].title)
+
+            resp.body = "OK"
+        except:
+            resp.body = "ERROR"
 
 
 class EditCategory(object):
@@ -737,14 +849,16 @@ class EditArtifactTranslation(object):
             resp.body = "ERROR"
 
 
-
+editpage        = EditPage()
+editpaget       = EditPageTranslation()
 editcategory    = EditCategory()
 editlanguage    = EditLanguage()
 editartifact    = EditArtifact()
 editcategoryt   = EditCategoryTranslation()
 editartifactt   = EditArtifactTranslation()
 
-
+api.add_route('/pages/edit', editpage)
+api.add_route('/pagetranslations/edit', editpaget)
 api.add_route('/categories/edit', editcategory)
 api.add_route('/categorytranslations/edit', editcategoryt)
 api.add_route('/languages/edit', editlanguage)
@@ -754,6 +868,29 @@ api.add_route('/artifacttranslations/edit', editartifactt)
 
 ################
 
+class RemovePage(object):
+    def on_post(self, req, resp):
+        data        = json.loads(req.stream.read().decode("utf-8"))
+        id          = data['id']
+
+        try:
+            found       = Page.objects(id=id)
+            found.delete()
+            resp.body = "OK"
+        except:
+            resp.body = "ERROR"
+
+class RemovePageTranslation(object):
+    def on_post(self, req, resp):
+        data        = json.loads(req.stream.read().decode("utf-8"))
+        id          = data['id']
+
+        try:
+            found       = PageTranslation.objects(id=id)
+            found.delete()
+            resp.body = "OK"
+        except:
+            resp.body = "ERROR"
 
 class RemoveCategory(object):
     def on_post(self, req, resp):
@@ -833,6 +970,8 @@ class RemoveArtifactTranslation(object):
         except:
             resp.body = "ERROR"
 
+removepage      = RemovePage()
+removepaget     = RemovePageTranslation()
 removecategory  = RemoveCategory()
 removecategoryt = RemoveCategoryTranslation()
 removelanguage  = RemoveLanguage()
@@ -841,6 +980,8 @@ removemedia     = RemoveMedia()
 removeartifactt = RemoveArtifactTranslation()
 
 
+api.add_route('/pages/remove', removepage)
+api.add_route('/pagetranslations/remove', removepaget)
 api.add_route('/categories/remove', removecategory)
 api.add_route('/categorytranslations/remove', removecategoryt)
 api.add_route('/languages/remove', removelanguage)

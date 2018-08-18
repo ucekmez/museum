@@ -63,6 +63,18 @@ class Media(gj.Document):
     artifact    = ReferenceField(Artifact, reverse_delete_rule=CASCADE) # keeps artifact id
     description = StringField()
 
+class Page(gj.Document):
+    title       = StringField(max_length=64)
+    content     = StringField()
+
+class PageTranslation(gj.Document):
+    page           = ReferenceField(Page, reverse_delete_rule=CASCADE)
+    language_code  = StringField(max_length=4)
+    language_title = StringField(max_length=16)
+    title          = StringField(max_length=64)
+    content        = StringField()
+    meta           = {'indexes': [{'fields': ['$title', '$content']}]}
+
 # create media
 # requests.post('http://localhost:8000/media/create/',
 #              files={'media': open('nophoto.png', 'rb'),

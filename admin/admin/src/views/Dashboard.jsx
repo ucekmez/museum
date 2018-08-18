@@ -12,7 +12,7 @@ import CardHeader from "components/Card/CardHeader.jsx";
 import CardIcon from "components/Card/CardIcon.jsx";
 import CardFooter from "components/Card/CardFooter.jsx";
 
-import { APIfetch, NEWCATEGORYPAGE, NEWARTIFACTPAGE } from "variables/helpers";
+import { APIfetch, NEWCATEGORYPAGE, NEWARTIFACTPAGE, NEWPAGEPAGE } from "variables/helpers";
 
 import dashboardStyle from "assets/jss/material-dashboard-react/views/dashboardStyle.jsx";
 
@@ -20,6 +20,7 @@ class Dashboard extends React.Component {
   state = {
     numberOfCategories: 0,
     numberOfArtifacts: 0,
+    numberOfPages: 0,
   };
 
 
@@ -39,10 +40,15 @@ class Dashboard extends React.Component {
     APIfetch('/artifacts',
       (r) => { this.setState({'numberOfArtifacts': r.data.length})},
       (r) => {console.log(r)})
+
+    APIfetch('/pages',
+      (r) => { this.setState({'numberOfPages': r.data.length})},
+      (r) => {console.log(r)})
   }
 
   gotoNewCategoryPage = (e) => { this.props.history.push(NEWCATEGORYPAGE) }
   gotoNewArtifactPage = (e) => { this.props.history.push(NEWARTIFACTPAGE) }
+  gotoNewPagePage     = (e) => { this.props.history.push(NEWPAGEPAGE) }
 
   render() {
 
@@ -80,8 +86,8 @@ class Dashboard extends React.Component {
                 <CardIcon color="success">
                   <PlusOne />
                 </CardIcon>
-                <p className={classes.cardCategory}>Yeni</p>
-                <h3 className={classes.cardTitle}>Sayfa</h3>
+                <p className={classes.cardCategory}>Toplam</p>
+                <h3 className={classes.cardTitle}>{this.state.numberOfPages} Sayfa</h3>
               </CardHeader>
               <CardFooter></CardFooter>
             </Card>

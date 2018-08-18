@@ -1,14 +1,20 @@
 import axios from 'axios';
 
-//export const APIURL               = "http://localhost:7778";
-export const APIURL               = "http://51.15.130.186:7778";
+export const APIURL               = "http://localhost:7778";
+//export const APIURL               = "http://51.15.130.186:7778";
 
 export const CATEGORIESPAGE       = "/categories";
 export const ARTIFACTSPAGE        = "/artifacts";
+export const PAGESPAGE            = "/pages";
+
+
 export const NEWCATEGORYPAGE      = "/newcategory";
 export const NEWARTIFACTPAGE      = "/newartifact";
+export const NEWPAGEPAGE          = "/newpage";
+
 export const EDITCATEGORYPAGE     = "/editcategory";
 export const EDITARTIFACTPAGE     = "/editartifact";
+export const EDITPAGEPAGE         = "/editpage";
 export const EDITMEDIAPAGE        = "/artifactmedia";
 
 export const LANGUAGESPAGE        = "/languages";
@@ -19,9 +25,14 @@ export const CTSPAGE              = "/categorytranslations"
 export const NEWCTPAGE            = "/newcategorytranslation";
 export const EDITCTPAGE           = "/editcategorytranslation";
 
+export const PTSPAGE              = "/pagetranslations"
+export const NEWPTPAGE            = "/newpagetranslation";
+export const EDITPTPAGE           = "/editpagetranslation";
+
 export const ATSPAGE              = "/artifacttranslations"
 export const NEWATPAGE            = "/newartifacttranslation";
 export const EDITATPAGE           = "/editartifacttranslation";
+
 
 
 export const APIfetch = (url, returncallback, errorcallback) => {
@@ -76,6 +87,41 @@ export const APIremovecategory = (inp, id) => {
       console.log("Kategori silindi");
       //window.location.reload()
       inp.props.history.push(CATEGORIESPAGE)
+    },
+    (r) => {console.log(r)})
+}
+
+
+/////////////////////////////// pages
+
+
+export const APInewpage = (inp) => {
+  APIcreate('/pages/create',
+            {'title': inp.state.title, 'content': inp.state.content},
+    (r) => {
+      console.log("Sayfa eklendi");
+      inp.props.history.push(PAGESPAGE)
+    },
+    (r) => {console.log(r)})
+}
+
+export const APIeditpage = (inp) => {
+  APIcreate('/pages/edit',
+            {'id': inp.state.id, 'title': inp.state.title, 'content': inp.state.content},
+    (r) => {
+      console.log("Sayfa düzenlendi");
+      inp.props.history.push(PAGESPAGE)
+    },
+    (r) => {console.log(r)})
+}
+
+
+export const APIremovepage = (inp, id) => {
+  APIcreate('/pages/remove', {'id': id, },
+    (r) => {
+      console.log("Sayfa silindi");
+      //window.location.reload()
+      inp.props.history.push(PAGESPAGE)
     },
     (r) => {console.log(r)})
 }
@@ -146,6 +192,41 @@ export const APIremovect = (inp, id, idc) => {
       console.log("Çeviri silindi");
       //window.location.reload()
       inp.props.history.push(CTSPAGE + "/" + idc)
+    },
+    (r) => {console.log(r)})
+}
+
+///////// page translations
+
+export const APInewpt = (inp) => {
+  APIcreate('/pagetranslations/create/'+inp.state.page,
+            {'language': inp.state.language,
+             'title': inp.state.title,
+             'content': inp.state.content},
+    (r) => {
+      console.log("Çeviri eklendi");
+      inp.props.history.push(PTSPAGE + "/" + inp.state.page)
+    },
+    (r) => {console.log(r)})
+}
+
+export const APIeditpt = (inp) => {
+  APIcreate('/pagetranslations/edit',
+            {'id': inp.state.id, 'title': inp.state.title, 'content': inp.state.content, 'language': inp.state.language},
+    (r) => {
+      console.log("Çeviri düzenlendi");
+      inp.props.history.push(PTSPAGE + "/" + inp.state.page)
+    },
+    (r) => {console.log(r)})
+}
+
+
+export const APIremovept = (inp, id, idc) => {
+  APIcreate('/pagetranslations/remove', {'id': id, },
+    (r) => {
+      console.log("Çeviri silindi");
+      //window.location.reload()
+      inp.props.history.push(PTSPAGE + "/" + idc)
     },
     (r) => {console.log(r)})
 }

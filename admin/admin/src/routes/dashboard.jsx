@@ -5,25 +5,33 @@ import DashboardIcon from "@material-ui/icons/Dashboard";
 import DashboardPage from "views/Dashboard.jsx";
 
 import CategoryList from "views/Categories/CategoryList.jsx";
-import NewCategory from "views/Categories/NewCategory.jsx";
+import NewCategory  from "views/Categories/NewCategory.jsx";
 import EditCategory from "views/Categories/EditCategory.jsx";
 
 import CTList from "views/Categories/Translations/CTList.jsx";
-import NewCT from "views/Categories/Translations/NewCT.jsx";
+import NewCT  from "views/Categories/Translations/NewCT.jsx";
 import EditCT from "views/Categories/Translations/EditCT.jsx";
 
+import PageList from "views/Pages/PageList.jsx";
+import NewPage  from "views/Pages/NewPage.jsx";
+import EditPage from "views/Pages/EditPage.jsx";
+
+import PTList from "views/Pages/Translations/PTList.jsx";
+import NewPT  from "views/Pages/Translations/NewPT.jsx";
+import EditPT from "views/Pages/Translations/EditPT.jsx";
+
 import ATList from "views/Artifacts/Translations/ATList.jsx";
-import NewAT from "views/Artifacts/Translations/NewAT.jsx";
+import NewAT  from "views/Artifacts/Translations/NewAT.jsx";
 import EditAT from "views/Artifacts/Translations/EditAT.jsx";
 
 import LanguageList from "views/Languages/LanguageList.jsx";
-import NewLanguage from "views/Languages/NewLanguage.jsx";
+import NewLanguage  from "views/Languages/NewLanguage.jsx";
 import EditLanguage from "views/Languages/EditLanguage.jsx";
 
 import ArtifactList from "views/Artifacts/ArtifactList.jsx";
-import NewArtifact from "views/Artifacts/NewArtifact.jsx";
+import NewArtifact  from "views/Artifacts/NewArtifact.jsx";
 import EditArtifact from "views/Artifacts/EditArtifact.jsx";
-import AddMedia from "views/Artifacts/AddMedia.jsx";
+import AddMedia     from "views/Artifacts/AddMedia.jsx";
 
 const dashboardRoutes = [
   {
@@ -54,6 +62,29 @@ const dashboardRoutes = [
     navbarName: "Kategori Düzenle",
     icon: DashboardIcon,
     component: EditCategory,
+    invisible: true
+  },
+  {
+    path: "/pages",
+    sidebarName: "Sayfalar",
+    navbarName: "Sayfalar",
+    icon: DashboardIcon,
+    component: PageList
+  },
+  {
+    path: "/newpage",
+    sidebarName: "Sayfa Ekle",
+    navbarName: "Sayfa Ekle",
+    icon: DashboardIcon,
+    component: NewPage,
+    invisible: true
+  },
+  {
+    path: "/editpage/:id",
+    sidebarName: "Sayfa Düzenle",
+    navbarName: "Sayfa Düzenle",
+    icon: DashboardIcon,
+    component: EditPage,
     invisible: true
   },
   {
@@ -134,6 +165,31 @@ const dashboardRoutes = [
     component: EditCT,
     invisible: true
   },
+  {
+    path: "/pagetranslations/:id",
+    sidebarName: "Sayfa Çevirileri",
+    navbarName: "Sayfa Çevirileri",
+    icon: DashboardIcon,
+    component: PTList,
+    invisible: true
+  },
+  {
+    path: "/newpagetranslation/:id", // buradaki id : kategori id'si
+    sidebarName: "Sayfa Çevirisi Ekle",
+    navbarName: "Sayfa Çevirisi Ekle",
+    icon: DashboardIcon,
+    component: NewPT,
+    invisible: true
+  },
+  {
+    path: "/editpagetranslation/:id", // buradaki id : ceviri id'si
+    sidebarName: "Sayfa Çevirisi Düzenle",
+    navbarName: "Sayfa Çevirisi Düzenle",
+    icon: DashboardIcon,
+    component: EditPT,
+    invisible: true
+  },
+
   {
     path: "/artifacttranslations/:id",
     sidebarName: "Eser Çevirileri",
