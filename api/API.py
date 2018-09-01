@@ -387,6 +387,23 @@ class FetchArtifactMedia(object):
         doc = Media.objects(artifact=id).to_json(indent=2)
         resp.body = doc
 
+class FetchArtifactMediaOnlyImage(object):
+    def on_get(self, req, resp, id):
+        doc = Media.objects(artifact=id, mediatype="image").to_json(indent=2)
+        resp.body = doc
+
+class FetchArtifactMediaOnlyVideo(object):
+    def on_get(self, req, resp, id):
+        doc = Media.objects(artifact=id, mediatype="video").to_json(indent=2)
+        resp.body = doc
+
+class FetchArtifactMediaOnlyAudio(object):
+    def on_get(self, req, resp, id):
+        doc = Media.objects(artifact=id, mediatype="audio").to_json(indent=2)
+        resp.body = doc
+
+
+
 class FetchAllMedia(object):
     def on_get(self, req, resp):
         result = Media.objects()
@@ -468,7 +485,12 @@ api.add_route('/artifacts/{id}/{lang}', singleartifact)
 api.add_route('/artifacts/{id}', singleartifact)
 api.add_route('/artifacts', allartifacts)
 api.add_route('/artifacts/lang/{lang}', allartifactslang)
+
 api.add_route('/artifacts/{id}/media', artifactmedia)
+api.add_route('/artifacts/{id}/media/image', FetchArtifactMediaOnlyImage())
+api.add_route('/artifacts/{id}/media/video', FetchArtifactMediaOnlyVideo())
+api.add_route('/artifacts/{id}/media/audio', FetchArtifactMediaOnlyAudio())
+
 api.add_route('/artifacttranslations/{id}', artifacttranslations)
 api.add_route('/artifacttranslation/{id}', singleartifacttranslation)
 api.add_route('/media/{id}', mediaobject)
