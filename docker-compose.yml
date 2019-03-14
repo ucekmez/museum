@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+  museumdbase:
+    image: mongo
+    container_name: "museumdbase"
+    networks:
+      - museum
+    expose:
+      - 27017
+    restart: always
+    volumes:
+      - ./db-vol:/data/db
+
+  museumapi:
+    image: ucekmez/museumapi
+    container_name: "museumapi"
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    networks:
+      - museum
+    expose:
+      - 7778
+    ports:
+      - 7778:7778
+    restart: always
+    depends_on:
+      - museumdbase
+    volumes:
+      - ./api-vol:/var/www/html/storage
+
+  museumapp:
+    image: ucekmez/museumapp
+    container_name: "museumapp"
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    networks:
+      - museum
+    expose:
+      - 3013
+    ports:
+      - 3013:9999
+    restart: always
+    depends_on:
+      - museumapi
+
+networks:
+  museum:
+    driver: bridge
